@@ -20,43 +20,44 @@ myExpl <- rast(bioclim_current)
 print(myExpl)
 
 # Format data with true absences
-myBiomodData <- BIOMOD_FormatingData(resp.name = myRespName,
+myBiomodData <- BIOMOD_FormatingData(dir.name = 'testFiles/',
+                                     resp.name = myRespName,
                                      resp.var = myResp,
                                      resp.xy = myRespXY,
                                      expl.var = myExpl)
 myBiomodData
 plot(myBiomodData)
 
-# # Transform true absences into potential pseudo-absences
-myResp.PA <- ifelse(myResp == 1, 1, NA)
-
-# # Format data with pseudo-absences : random method
-myBiomodData.r <- BIOMOD_FormatingData(resp.var = myResp.PA,
-                                       expl.var = myExpl,
-                                       resp.xy = myRespXY,
-                                       resp.name = myRespName,
-                                       PA.nb.rep = 4,
-                                       PA.nb.absences = 1000,
-                                       PA.strategy = 'random')
- 
-myBiomodData.r
-plot(myBiomodData.r)
-
-# # Select multiple sets of pseudo-absences
-# # Transform true absences into potential pseudo-absences
-myResp.PA <- ifelse(myResp == 1, 1, NA)
+# # # Transform true absences into potential pseudo-absences
+# myResp.PA <- ifelse(myResp == 1, 1, NA)
 # 
-# # Format Data with pseudo-absences : random method
-myBiomodData.multi <- BIOMOD_FormatingData(resp.var = myResp.PA,
-                                           expl.var = myExpl,
-                                           resp.xy = myRespXY,
-                                           resp.name = myRespName,
-                                           PA.nb.rep = 4,
-                                           PA.nb.absences = c(1000, 500, 500, 200),
-                                           PA.strategy = 'random')
-myBiomodData.multi
-summary(myBiomodData.multi)
-plot(myBiomodData.multi)
+# # # Format data with pseudo-absences : random method
+# myBiomodData.r <- BIOMOD_FormatingData(resp.var = myResp.PA,
+#                                        expl.var = myExpl,
+#                                        resp.xy = myRespXY,
+#                                        resp.name = myRespName,
+#                                        PA.nb.rep = 4,
+#                                        PA.nb.absences = 1000,
+#                                        PA.strategy = 'random')
+# 
+# myBiomodData.r
+# plot(myBiomodData.r)
+# 
+# # # Select multiple sets of pseudo-absences
+# # # Transform true absences into potential pseudo-absences
+# myResp.PA <- ifelse(myResp == 1, 1, NA)
+# #
+# # # Format Data with pseudo-absences : random method
+# myBiomodData.multi <- BIOMOD_FormatingData(resp.var = myResp.PA,
+#                                            expl.var = myExpl,
+#                                            resp.xy = myRespXY,
+#                                            resp.name = myRespName,
+#                                            PA.nb.rep = 4,
+#                                            PA.nb.absences = c(1000, 500, 500, 200),
+#                                            PA.strategy = 'random')
+# myBiomodData.multi
+# summary(myBiomodData.multi)
+# plot(myBiomodData.multi)
 
 # # # k-fold selection
 # cv.k <- bm_CrossValidation(bm.format = myBiomodData,

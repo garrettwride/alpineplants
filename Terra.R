@@ -1,7 +1,5 @@
 library(terra)
 library(geodata)
-library(sf)
-
 
 # How I got the region in the first place (download lable areas from here: https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-physical-labels/)
 
@@ -15,12 +13,12 @@ library(sf)
 # This is a map of the US and Canada rectangle. (need gadm files to run, not on git bc big)
 # us <- gadm(country="USA", level=0, path=".")
 # can <- gadm(country="CAN", level=0, path=".")
-# mapData <- rbind(us, can)
-# myBox <- ext(-128, -103, 35, 60)
-# regionalMap <- crop(mapData, myBox)
+# map_data <- rbind(us, can)
+# my_box <- ext(-128, -103, 35, 60)
+# regional_map <- crop(mapData, myBox)
 
-rockyMntPoly <-st_read("./RockyMountainsRegion/rocky_mountains.shp")
-rockyMntSpat <- vect(rockyMntPoly)
+rocky_mnt_poly <-st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_mnt_spat <- vect(rockyMntPoly)
 
-#plot(regionalMap, col="lightblue", main="US and Canada Map")
-plot(rockyMntPoly, col="lightgreen") # add this argument if printing on map , add=TRUE,
+#plot(regional_map, col="lightgrey", main="US and Canada Map")
+plot(rocky_mnt_poly, col="darkgrey", max.plot = 1) # add this argument if printing on map , add=TRUE,

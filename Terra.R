@@ -1,5 +1,6 @@
 library(terra)
 library(geodata)
+library(sf)
 
 # How I got the region in the first place (download lable areas from here: https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-physical-labels/)
 

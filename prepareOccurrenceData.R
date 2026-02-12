@@ -12,7 +12,7 @@ hackberry <- occ_search(
 hack_data <- hackberry$data
 
 occ_sf <- st_as_sf(
-  occ_clean,
+  hack_data,
   coords = c("decimalLongitude", "decimalLatitude"),
   crs = 4326
 )

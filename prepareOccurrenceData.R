@@ -11,10 +11,8 @@ hackberry <- occ_search(
 # Extract the data frame
 hack_data <- hackberry$data
 
-  )
-
-occ_sf <- hack_data(
-  occ_clean,
+occ_sf <- st_as_sf(
+  hack_data,
   coords = c("decimalLongitude", "decimalLatitude"),
   crs = 4326
 )

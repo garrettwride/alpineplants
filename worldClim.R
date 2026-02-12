@@ -42,3 +42,14 @@ bio_rocky_2.5
 myExpl_2.5 <- bio_rocky_2.5[[c(1, 3, 4, 12, 15)]]
 
 plot(myExpl_2.5)
+
+#Run with resolution 0.5
+bio_2.5 <- worldclim_global(var = "bio", res = 0.5, path = "./climate_data/climate_0.5")
+
+bio_rocky_0.5 <- crop(bio_0.5, rocky_vect)
+bio_rocky_0.5 <- mask(bio_rocky_0.5, rocky_vect)
+bio_rocky_0.5
+
+myExpl_0.5 <- bio_rocky_0.5[[c(1, 3, 4, 12, 15)]]
+
+plot(myExpl_0.5)

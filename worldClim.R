@@ -15,7 +15,7 @@ bio_rocky <- crop(bio, rocky_vect)
 bio_rocky <- mask(bio_rocky, rocky_vect)
 bio_rocky
 
-myExpl <- bio_rocky[[c(1, 5, 12)]]
+myExpl <- bio_rocky[[c(1, 3, 4, 12, 15)]]
 
 plot(myExpl[[1]])
 points(resp.xy, col="red", pch=16)

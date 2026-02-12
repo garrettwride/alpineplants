@@ -4,3 +4,5 @@
 .Ruserdata
 testFiles/
 .DS_Store
+climate_data/
+*.tif

@@ -10,21 +10,27 @@ library(sf)
 #trees: Acer glabrum (G): 3189864; Abies lasiocarpa (S):2685313 
 #shrubs: Celtis reticulata (G): 6406316; Salix petrophila (S): 5372756
 
-#make sure that cc_inst removes fossils, and can keep all basis of records
-#clean_coordinates runs: cc_val, cc_zero, cc_sea, cc_cap, cc_cen, cc_outl
-
-#longitude (X) and latitude (Y), a vector (NA and 1), use coordinates from polygon, then check
-#current length: 312
 #check diff between using occ_search and occ_download
 #maybe add basisOfRecord, remove duplicates, hasGeospatialIssue = FALSE
 
-clean_and_get_occurrences <- function(taxon_key, species_name) {
+#speed up: use geometry parameter in occ_search
+#read polygon once outside of function, must convert it to wkt (gbif accepts wkt geometry)
+
+#reads .shp into sf object
+rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
+rocky_wkt <- st_as_text(st_union(rocky_poly))
+
+clean_and_get_occurrences <- function(taxon_key, species_name, rocky_poly, rocky_wkt) {
 
   occ <- occ_search(
     taxonKey = taxon_key, 
-    scientificName = species_name,
+    #scientificName = species_name, not needed
     hasCoordinate = TRUE,
+    hasGeospatialIssue = FALSE, 
+    geometry = rocky_wkt, 
     limit = 100000
+    #basisOfRecord = "HUMAN_OBSERVATION", "MACHINE_OBSERVATION",
   )
   
   # Extract the data frame
@@ -47,29 +53,23 @@ clean_and_get_occurrences <- function(taxon_key, species_name) {
   #so each row has a geometry point
   df_cleaned <- df[cleaned$.summary == TRUE, ]
   
-  #remove dupes
+  #if remove dupes, do here
   
   #st_as_sf converts foreign object to a spatial object
   occ_sf <- st_as_sf(
     df_cleaned,
-    #occ_clean, #can't find this function (placeholder?)
     coords = c("decimalLongitude", "decimalLatitude"),
     remove = FALSE, #do not remove coords from df
     crs = 4326 #same for each?
   )
   
-  #reads .shp into sf object
-  rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
-  rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
-  
   #only keep points inside polygon (only rocky mountains)
+  #don't need bc of gbif geometry parameter,
+  #but there may be differences bc gbif uses its own spatial engine
   occ_rocky <- occ_sf[st_within(occ_sf, rocky_poly, sparse = FALSE), ]
   
   #remove spatial geo col, back to normal df
   occ_rocky_df <- st_drop_geometry(occ_rocky)
-  
-  #another safety check? if nrow occ_df == 0, stop(no points in polygon?)
-  
   
   #BIOMOD inputs:
   
@@ -90,7 +90,38 @@ clean_and_get_occurrences <- function(taxon_key, species_name) {
 
 } 
 
-hackberry_data <- clean_and_get_occurrences(6406316, "Celtis reticulata")
+#4,297 occurrences
+moss_campion_data <- clean_and_get_occurrences(5384754, "Silene acaulis", rocky_poly, rocky_wkt)
+moss_campion_data$resp.var
+moss_campion_data$resp.xy
+moss_campion_data$resp.name
+
+#10; 10
+shootingstar_data <- clean_and_get_occurrences(5641386, "Primula utahensis", rocky_poly, rocky_wkt)
+shootingstar_data$resp.var
+shootingstar_data$resp.xy
+shootingstar_data$resp.name
+
+#6,217; 6,170
+maple_data <- clean_and_get_occurrences(3189864, "Acer glabrum", rocky_poly, rocky_wkt)
+maple_data$resp.var
+maple_data$resp.xy
+maple_data$resp.name
+
+#5,209; 5,211
+fir_data <- clean_and_get_occurrences(2685313, "Abies lasiocarpa", rocky_poly, rocky_wkt)
+fir_data$resp.var
+fir_data$resp.xy
+fir_data$resp.name
+
+#312; 323
+hackberry_data <- clean_and_get_occurrences(6406316, "Celtis reticulata", rocky_poly, rocky_wkt)
 hackberry_data$resp.var
 hackberry_data$resp.xy
 hackberry_data$resp.name
+
+#469; 518
+willow_data <- clean_and_get_occurrences(5372756, "Salix petrophila", rocky_poly, rocky_wkt)
+willow_data$resp.var
+willow_data$resp.xy
+willow_data$resp.name

@@ -4,6 +4,7 @@ library(terra)
 library(rgbif)
 library(sf)
 library(dplyr)
+library(elevatr)
 
 rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)
@@ -53,3 +54,8 @@ bio_rocky_0.5
 myExpl_0.5 <- bio_rocky_0.5[[c(1, 3, 4, 12, 15)]]
 
 plot(myExpl_0.5)
+
+
+#Get elevation data
+
+elev_raw <- get_elev_raster(locations = rocky_poly, z = 10, clip = "bbox")

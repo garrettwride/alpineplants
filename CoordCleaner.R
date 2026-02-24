@@ -2,6 +2,10 @@ library(CoordinateCleaner)
 library(rgbif)
 library(dplyr)
 library(sf)
+library(tidyr)
+library(purrr)
+
+#put all info into one dataframe
 
 #occ_search(taxonKey=5384754, country="US;CA", basisOfRecord="HUMAN_OBSERVATION")
 #occ_search(taxonKey=5641386, country="US;CA", basisOfRecord ="HUMAN_OBSERVATION")
@@ -125,3 +129,36 @@ willow_data <- clean_and_get_occurrences(5372756, "Salix petrophila", rocky_poly
 willow_data$resp.var
 willow_data$resp.xy
 willow_data$resp.name
+
+#for BIOMOD input:
+#lmk if this this what garret biomod needed
+species_list <- list(
+  moss_campion_data,
+  shootingstar_data,
+  maple_data,
+  fir_data,
+  hackberry_data,
+  willow_data
+)
+
+long_data <- species_list %>%
+  map_df(function(species) {
+    data.frame(
+      X_WGS84 = species$resp.xy$decimalLongitude,
+      Y_WGS84 = species$resp.xy$decimalLatitude,
+      Species = make.names(species$resp.name),
+      Presence = 1
+    )
+  })
+
+DataSpecies <- long_data %>%
+  distinct() %>%
+  pivot_wider(
+    names_from = Species,
+    values_from = Presence,
+    values_fill = 0
+  )
+
+head(DataSpecies)
+
+

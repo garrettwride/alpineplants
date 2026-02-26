@@ -3,22 +3,13 @@ library(rgbif)
 library(dplyr)
 library(sf)
 library(tidyr)
-library(purrr)
-
-#put all info into one dataframe
-
-#occ_search(taxonKey=5384754, country="US;CA", basisOfRecord="HUMAN_OBSERVATION")
-#occ_search(taxonKey=5641386, country="US;CA", basisOfRecord ="HUMAN_OBSERVATION")
 
 #herbs: Silene acaulis (G): 5384754; Primula utahensis (S): 5641386
 #trees: Acer glabrum (G): 3189864; Abies lasiocarpa (S):2685313 
 #shrubs: Celtis reticulata (G): 6406316; Salix petrophila (S): 5372756
 
 #check diff between using occ_search and occ_download
-#maybe add basisOfRecord, remove duplicates, hasGeospatialIssue = FALSE
-
-#speed up: use geometry parameter in occ_search
-#read polygon once outside of function, must convert it to wkt (gbif accepts wkt geometry)
+#maybe add basisOfRecord, remove duplicates
 
 #reads .shp into sf object
 rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
@@ -94,51 +85,68 @@ clean_and_get_occurrences <- function(taxon_key, species_name, rocky_poly, rocky
 
 } 
 
-#4,297 occurrences
+#4,304 occurrences
 moss_campion_data <- clean_and_get_occurrences(5384754, "Silene acaulis", rocky_poly, rocky_wkt)
 moss_campion_data$resp.var
 moss_campion_data$resp.xy
 moss_campion_data$resp.name
 
-#10; 10
+#1,608
+tall_larkspur <- clean_and_get_occurrences(3033713, "Delphinium occidentale", rocky_poly, rocky_wkt)
+tall_larkspur$resp.xy
+
+#10
 shootingstar_data <- clean_and_get_occurrences(5641386, "Primula utahensis", rocky_poly, rocky_wkt)
-shootingstar_data$resp.var
 shootingstar_data$resp.xy
-shootingstar_data$resp.name
 
-#6,217; 6,170
+#6,170
 maple_data <- clean_and_get_occurrences(3189864, "Acer glabrum", rocky_poly, rocky_wkt)
-maple_data$resp.var
 maple_data$resp.xy
-maple_data$resp.name
 
-#5,209; 5,211
+#5,211
 fir_data <- clean_and_get_occurrences(2685313, "Abies lasiocarpa", rocky_poly, rocky_wkt)
-fir_data$resp.var
 fir_data$resp.xy
-fir_data$resp.name
 
-#312; 323
+#1,470
+green_ash <- clean_and_get_occurrences(3012298, "Sorbus scopulina", rocky_poly, rocky_wkt)
+green_ash$resp.xy
+
+#9,059
+cinque_foil <- clean_and_get_occurrences(5370380, "Dasiphora fruticosa", rocky_poly, rocky_wkt)
+cinque_foil$resp.xy
+
+#323
 hackberry_data <- clean_and_get_occurrences(6406316, "Celtis reticulata", rocky_poly, rocky_wkt)
-hackberry_data$resp.var
 hackberry_data$resp.xy
-hackberry_data$resp.name
 
-#469; 518
+#518
 willow_data <- clean_and_get_occurrences(5372756, "Salix petrophila", rocky_poly, rocky_wkt)
-willow_data$resp.var
 willow_data$resp.xy
-willow_data$resp.name
+
+#238
+showy_sedge <- clean_and_get_occurrences(2723145, "Carex spectabilis", rocky_poly, rocky_wkt)
+showy_sedge$resp.xy
+
+#110
+rocky_sedge <- clean_and_get_occurrences(2722910, "Carex arapahoensis", rocky_poly, rocky_wkt)
+rocky_sedge$resp.xy
+
+#147
+baldy_sedge <- clean_and_get_occurrences(2723300, "Carex perglobosa", rocky_poly, rocky_wkt)
+baldy_sedge$resp.xy
 
 #for BIOMOD input:
-#lmk if this this what garret biomod needed
 species_list <- list(
   moss_campion_data,
   shootingstar_data,
   maple_data,
   fir_data,
   hackberry_data,
-  willow_data
+  willow_data#,
+  #start with 6 species, add more when using supercomputer(?)
+  #showy_sedge,
+  #rocky_sedge,
+  #baldy_sedge
 )
 
 long_data <- species_list %>%

@@ -193,3 +193,8 @@ species_df <- species_df %>%
   ungroup()
 
 View(species_df)
+
+shapiro.test(species_df$NicheBreadth)
+shapiro.test(species_df$Abundace)
+
+cor.test(species_df$Abundace, species_df$NicheBreadth, method = "pearson")

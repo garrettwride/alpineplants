@@ -168,7 +168,7 @@ niche_metrics <- niche_metrics %>%
     Specialization = -NicheBreadth
   )
 
-niche_results <- niche_results %>%
+niche_results <- niche_metrics %>%
   mutate(
     Elev_z = scale(ElevSD),
     Clim_z = scale(ClimDispersion),
@@ -184,5 +184,12 @@ species_df <- species_df %>%
     niche_metrics %>% select(Species, NicheBreadth),
     by = "Species"
   )
+
+species_df <- species_df %>%
+  rowwise() %>%
+  mutate(
+    Abundace = length(Data$resp.xy$decimalLongitude)
+  ) %>%
+  ungroup()
 
 View(species_df)

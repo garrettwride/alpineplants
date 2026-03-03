@@ -198,3 +198,7 @@ shapiro.test(species_df$NicheBreadth)
 shapiro.test(species_df$Abundace)
 
 cor.test(species_df$Abundace, species_df$NicheBreadth, method = "pearson")
+
+cor.test(species_df$Abundace, niche_results$Elev_z, method = "pearson")
+cor.test(species_df$Abundace, niche_results$Clim_z, method = "pearson")
+cor.test(species_df$Abundace, niche_results$Geo_z, method = "pearson")

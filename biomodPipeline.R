@@ -169,7 +169,7 @@ niche_metrics <- niche_metrics %>%
     Specialization = -NicheBreadth
   )
 
-niche_results <- niche_results %>%
+niche_results <- niche_metrics %>%
   mutate(
     Elev_z = scale(ElevSD),
     Clim_z = scale(ClimDispersion),

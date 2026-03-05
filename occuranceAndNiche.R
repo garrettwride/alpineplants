@@ -30,19 +30,31 @@ elev_rocky <- mask(elev_rocky, rocky_poly)
 species_info <- tibble(
   Species = c(
     "Silene acaulis",
+    "Delphinium occidentale",
     "Dryas octopetala",
     "Acer glabrum",
     "Abies lasiocarpa",
+    "Sorbus scopulina",
+    "Dasiphora fruticosa",
     "Celtis reticulata",
-    "Salix petrophila"
+    "Salix petrophila",
+    "Carex spectabilis",
+    "Carex arapahoensis",
+    "Carex perglobosa"
   ),
   taxon_key = c(
     5384754,
+    3033713,
     4889932,
     3189864,
     2685313,
+    3012298,
+    5370380,
     6406316,
-    5372756
+    5372756,
+    2723145,
+    2722910,
+    2723300
   )
 )
 
@@ -188,17 +200,18 @@ species_df <- species_df %>%
 species_df <- species_df %>%
   rowwise() %>%
   mutate(
-    Abundace = length(Data$resp.xy$decimalLongitude)
+    Abundance = length(Data$resp.xy$decimalLongitude)
   ) %>%
   ungroup()
+  
 
 View(species_df)
 
 shapiro.test(species_df$NicheBreadth)
-shapiro.test(species_df$Abundace)
+shapiro.test(species_df$Abundance)
 
-cor.test(species_df$Abundace, species_df$NicheBreadth, method = "pearson")
+cor.test(species_df$Abundance, species_df$NicheBreadth, method = "pearson")
 
-cor.test(species_df$Abundace, niche_results$Elev_z, method = "pearson")
-cor.test(species_df$Abundace, niche_results$Clim_z, method = "pearson")
-cor.test(species_df$Abundace, niche_results$Geo_z, method = "pearson")
+cor.test(species_df$Abundance, niche_results$Elev_z, method = "pearson")
+cor.test(species_df$Abundance, niche_results$Clim_z, method = "pearson")
+cor.test(species_df$Abundance, niche_results$Geo_z, method = "pearson")

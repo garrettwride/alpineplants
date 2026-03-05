@@ -1,8 +1,6 @@
 library(terra)
-library(rgbif)
 library(sf)
 library(dplyr)
-library(CoordinateCleaner)
 library(tidyr)
 library(purrr)
 
@@ -10,106 +8,10 @@ library(purrr)
 rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
 rocky_wkt <- st_as_text(st_union(rocky_poly))
+species_df <- readRDS("data/species_occurrences.rds")
+myExpl     <- readRDS("data/myExpl.rds")
+elev_rocky <- readRDS("data/elev_rocky.rds")
 
-## Get Environmental Data
-library(geodata)
-
-bio <- worldclim_global(var = "bio", res = 10, path = "./")
-
-bio_rocky <- crop(bio, rocky_poly)
-bio_rocky <- mask(bio_rocky, rocky_poly)
-
-myExpl <- bio_rocky[[c(1, 3, 4, 12, 15)]]
-
-# Get elevation data
-elev <- worldclim_global(var = "elev", res = 10, path = "./climate/")
-
-elev_rocky <- crop(elev, rocky_poly)
-elev_rocky <- mask(elev_rocky, rocky_poly)
-
-## Get occurrence Data
-species_info <- tibble(
-  Species = c(
-    "Silene acaulis",
-    "Dryas octopetala",
-    "Acer glabrum",
-    "Abies lasiocarpa",
-    "Celtis reticulata",
-    "Salix petrophila"
-  ),
-  taxon_key = c(
-    5384754,
-    4889932,
-    3189864,
-    2685313,
-    6406316,
-    5372756
-  )
-)
-
-clean_and_get_occurrences <- function(taxon_key, species_name, rocky_poly, rocky_wkt) {
-  
-  occ <- occ_search(
-    taxonKey = taxon_key, 
-    hasCoordinate = TRUE,
-    hasGeospatialIssue = FALSE, 
-    geometry = rocky_wkt, 
-    limit = 100000
-  )
-  
-  df <- occ$data
-  
-  if(nrow(df) == 0) {
-    stop("no record found")
-  }
-  
-  cleaned <- clean_coordinates(
-    x = df,
-    lon = "decimalLongitude",
-    lat = "decimalLatitude",
-    species = "species",
-    tests = c("capitals", "centroids", "equal", "gbif", "institutions",
-              "outliers", "seas", "zeros")
-  )
-  
-  df_cleaned <- df[cleaned$.summary == TRUE, ]
-  
-  occ_sf <- st_as_sf(
-    df_cleaned,
-    coords = c("decimalLongitude", "decimalLatitude"),
-    remove = FALSE,
-    crs = 4326
-  )
-  
-  occ_rocky <- occ_sf[st_within(occ_sf, rocky_poly, sparse = FALSE), ]
-  occ_rocky_df <- st_drop_geometry(occ_rocky)
-  
-  resp.var <- rep(1, nrow(occ_rocky_df))
-  resp.xy <- occ_rocky_df[, c("decimalLongitude", "decimalLatitude")]
-  resp.name <- species_name
-  
-  return(list(
-    resp.var = resp.var,
-    resp.xy = resp.xy,
-    resp.name = resp.name
-  ))
-}
-
-species_df <- species_info %>%
-  mutate(
-    Data = map2(
-      taxon_key,
-      Species,
-      ~ clean_and_get_occurrences(
-        taxon_key = .x,
-        species_name = .y,
-        rocky_poly = rocky_poly,
-        rocky_wkt = rocky_wkt
-      )
-    )
-  )
-
-print(species_df)
 calculate_niche_metrics <- function(species_obj, climate_stack, elev_raster) {
   
   pts <- vect(species_obj$resp.xy,
@@ -151,31 +53,24 @@ calculate_niche_metrics <- function(species_obj, climate_stack, elev_raster) {
 
 niche_metrics <- species_df %>%
   mutate(
-    metrics = map(
-      Data,
-      calculate_niche_metrics,
-      climate_stack = myExpl,
-      elev_raster = elev_rocky
-    )
+    metrics = map(Occurrences, function(df) {
+      
+      species_obj <- list(
+        resp.xy = df[, c("decimalLongitude","decimalLatitude")]
+      )
+      
+      calculate_niche_metrics(
+        species_obj,
+        climate_stack = myExpl,
+        elev_raster = elev_rocky
+      )
+    })
   ) %>%
-  unnest(metrics)
-
-niche_metrics <- niche_metrics %>%
+  unnest(metrics) %>%
   mutate(
     Elev_z = as.numeric(scale(ElevSD)),
     Clim_z = as.numeric(scale(ClimDispersion)),
     Geo_z  = as.numeric(scale(GeoArea_km2)),
-    NicheBreadth = Elev_z + Clim_z + Geo_z,
-    Specialization = -NicheBreadth
-  )
-
-niche_results <- niche_metrics %>%
-  mutate(
-    Elev_z = scale(ElevSD),
-    Clim_z = scale(ClimDispersion),
-    Geo_z  = scale(GeoArea_km2)
-  ) %>%
-  mutate(
     NicheBreadth = Elev_z + Clim_z + Geo_z,
     Specialization = -NicheBreadth
   )
@@ -185,6 +80,7 @@ species_df <- species_df %>%
     niche_metrics %>% select(Species, NicheBreadth),
     by = "Species"
   )
+
 ### Biomod pipeline
 library(biomod2)
 
@@ -225,7 +121,7 @@ elevation_centroid <- function(suitability, elevation) {
 }
 
 
-algorithms   <- c("GLM", "GAM", "RF") # "MAXENT"
+algorithms   <- c("GLM", "GAM", "RF") #, "MAXENT")
 pa_strategies <- c("random", "disk")
 pa_numbers    <- c(1, 3, 5)   # × presences
 n_boot        <- 5
@@ -246,11 +142,14 @@ results <- data.frame(
 
 # outermost loop
 for (i in seq_len(nrow(species_df))) {
+  
   respName <- species_df$Species[i]
-  species  <- species_df$Data[[i]]
   niche_breadth <- species_df$NicheBreadth[i]
-  resp <- species$resp.var
-  respXY <- species$resp.xy
+  
+  occ_df <- species_df$Occurrences[[i]]
+  
+  respXY <- occ_df[, c("decimalLongitude", "decimalLatitude")]
+  resp   <- rep(1, nrow(respXY))
   
   # Baseline ensemble model that uses all occurrence data
   baseline_data <- BIOMOD_FormatingData(
@@ -298,7 +197,7 @@ for (i in seq_len(nrow(species_df))) {
   # Bootsrap occurance data (next loop)
   for (b in seq_len(n_boot)) {
     set.seed(b)
-  
+    
     boot_idx  <- sample(seq_len(nrow(respXY)), replace = TRUE)
     boot_xy   <- respXY[boot_idx, ]
     boot_resp <- rep(1, nrow(boot_xy))
@@ -306,7 +205,7 @@ for (i in seq_len(nrow(species_df))) {
     # Set up Pseudo-absences (next 2 loops)
     for (pa_strat in pa_strategies) {
       for (pa_mult in pa_numbers) {
-        PA_n <- pa_mult * length(resp)
+        PA_n <- pa_mult * length(boot_resp)
         
         myBiomodData <- BIOMOD_FormatingData(
           dir.name = tempdir(),
@@ -348,7 +247,7 @@ for (i in seq_len(nrow(species_df))) {
         glm_raster <- get_model_layer(r, "GLM")
         gam_raster <- get_model_layer(r, "GAM")
         rf_raster  <- get_model_layer(r, "RF")
-  
+        
         glm_bin <- get_model_layer(r_bin, "GLM")
         gam_bin <- get_model_layer(r_bin, "GAM")
         rf_bin  <- get_model_layer(r_bin, "RF")
@@ -408,7 +307,7 @@ for (i in seq_len(nrow(species_df))) {
           MeanSuitability = mean_rf,
           SuitableArea = area_rf,
           SchoenersD = D_rf,
-          ElevationCentroid = elev_glm
+          ElevationCentroid = elev_rf
         ))
       }
     }

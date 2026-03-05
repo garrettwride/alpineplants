@@ -3,6 +3,8 @@
 .RData
 .Ruserdata
 testFiles/
+data/
+climate/
 .DS_Store
 climate_data/
 *.tif

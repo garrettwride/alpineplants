@@ -39,7 +39,6 @@ calculate_niche_metrics <- function(species_obj, climate_stack, elev_raster) {
   pts_sf <- st_as_sf(species_obj$resp.xy,
                      coords = c("decimalLongitude", "decimalLatitude"),
                      crs = 4326)
-  
   hull <- st_convex_hull(st_union(pts_sf))
   hull_area <- as.numeric(st_area(st_transform(hull, 5070))) / 10^6
   
@@ -54,7 +53,6 @@ calculate_niche_metrics <- function(species_obj, climate_stack, elev_raster) {
 niche_metrics <- species_df %>%
   mutate(
     metrics = map(Occurrences, function(df) {
-      
       species_obj <- list(
         resp.xy = df[, c("decimalLongitude","decimalLatitude")]
       )
@@ -121,21 +119,23 @@ elevation_centroid <- function(suitability, elevation) {
 }
 
 
-algorithms   <- c("GLM", "GAM", "RF") #, "MAXENT")
+algorithms   <- c("GLM", "GAM", "RF", "MAXENT")
 pa_strategies <- c("random", "disk")
 pa_numbers    <- c(1, 3, 5)   # × presences
-n_boot        <- 5
+n_boot        <- 10
 
 results <- data.frame(
-  Species        = character(),
-  NicheBreadth    = numeric(),
-  Bootstrap      = integer(),
-  Algorithm      = character(),
-  PAStrategy     = character(),
-  PANumber       = integer(),
-  MeanSuitability= numeric(),
-  SuitableArea   = numeric(),
-  SchoenersD     = numeric(),
+  Species = character(),
+  NicheBreadth = numeric(),
+  Occurrences = numeric(),
+  LogOccurrences = numeric(),
+  Bootstrap = integer(),
+  Algorithm = character(),
+  PAStrategy = character(),
+  PANumber = integer(),
+  MeanSuitability = numeric(),
+  SuitableArea = numeric(),
+  SchoenersD = numeric(),
   ElevationCentroid = numeric(),
   stringsAsFactors = FALSE
 )
@@ -150,6 +150,9 @@ for (i in seq_len(nrow(species_df))) {
   
   respXY <- occ_df[, c("decimalLongitude", "decimalLatitude")]
   resp   <- rep(1, nrow(respXY))
+  
+  num_occ <- nrow(respXY)
+  log_occ <- log10(num_occ)
   
   # Baseline ensemble model that uses all occurrence data
   baseline_data <- BIOMOD_FormatingData(
@@ -243,75 +246,52 @@ for (i in seq_len(nrow(species_df))) {
         # Extract the SpatRaster object
         r <- rast(myBiomodProj@proj.out@link[1])
         r_bin <- rast(myBiomodProj@proj.out@link[2])
-        # Extract the layers we want
-        glm_raster <- get_model_layer(r, "GLM")
-        gam_raster <- get_model_layer(r, "GAM")
-        rf_raster  <- get_model_layer(r, "RF")
+        # Extract the SpatRaster objects
+        r <- rast(myBiomodProj@proj.out@link[1])
+        r_bin <- rast(myBiomodProj@proj.out@link[2])
         
-        glm_bin <- get_model_layer(r_bin, "GLM")
-        gam_bin <- get_model_layer(r_bin, "GAM")
-        rf_bin  <- get_model_layer(r_bin, "RF")
-        
-        # Calculate Metrics
-        mean_glm <- global(glm_raster, "mean", na.rm = TRUE)[1,1]
-        area_glm <- global(glm_bin, "sum", na.rm = TRUE)[1,1] * prod(res(glm_bin))
-        mean_gam <- global(gam_raster, "mean", na.rm = TRUE)[1,1]
-        area_gam <- global(gam_bin, "sum", na.rm = TRUE)[1,1] * prod(res(gam_bin))
-        mean_rf <- global(rf_raster, "mean", na.rm = TRUE)[1,1]
-        area_rf <- global(rf_bin, "sum", na.rm = TRUE)[1,1] * prod(res(rf_bin))
-        
-        # Normalize rasters for Schoener's D
-        glm_norm <- normalize_raster(glm_raster)
-        gam_norm <- normalize_raster(gam_raster)
-        rf_norm  <- normalize_raster(rf_raster)
-        D_glm <- schoeners_d(glm_norm, baseline_ensemble)
-        D_gam <- schoeners_d(gam_norm, baseline_ensemble)
-        D_rf  <- schoeners_d(rf_norm, baseline_ensemble)
-        
-        # Calculate Elevation Centroid
-        elev_glm <- elevation_centroid(glm_raster, elev_rocky)
-        elev_gam <- elevation_centroid(gam_raster, elev_rocky)
-        elev_rf  <- elevation_centroid(rf_raster, elev_rocky)
-        
-        results <- rbind(results, data.frame(
-          Species = respName,
-          NicheBreadth = niche_breadth,
-          Bootstrap = b,
-          Algorithm = "GLM",
-          PAStrategy = pa_strat,
-          PANumber = pa_mult,
-          MeanSuitability = mean_glm,
-          SuitableArea = area_glm,
-          SchoenersD = D_glm,
-          ElevationCentroid = elev_glm
-        ))
-        results <- rbind(results, data.frame(
-          Species = respName,
-          NicheBreadth = niche_breadth,
-          Bootstrap = b,
-          Algorithm = "GAM",
-          PAStrategy = pa_strat,
-          PANumber = pa_mult,
-          MeanSuitability = mean_gam,
-          SuitableArea = area_gam,
-          SchoenersD = D_gam,
-          ElevationCentroid = elev_gam
-        ))
-        results <- rbind(results, data.frame(
-          Species = respName,
-          NicheBreadth = niche_breadth,
-          Bootstrap = b,
-          Algorithm = "RF",
-          PAStrategy = pa_strat,
-          PANumber = pa_mult,
-          MeanSuitability = mean_rf,
-          SuitableArea = area_rf,
-          SchoenersD = D_rf,
-          ElevationCentroid = elev_rf
-        ))
+        # Loop over algorithms
+        for (algo in algorithms) {
+          
+          # Extract raster layers
+          algo_raster <- get_model_layer(r, algo)
+          algo_bin    <- get_model_layer(r_bin, algo)
+          
+          # ---- Metrics ----
+          mean_suit <- global(algo_raster, "mean", na.rm = TRUE)[1,1]
+          
+          suitable_area <- global(algo_bin, "sum", na.rm = TRUE)[1,1] *
+            prod(res(algo_bin))
+          
+          # Schoener's D
+          algo_norm <- normalize_raster(algo_raster)
+          D_val <- schoeners_d(algo_norm, baseline_ensemble)
+          
+          # Elevation centroid
+          elev_cent <- elevation_centroid(algo_raster, elev_rocky)
+          
+          # Save results
+          results <- rbind(
+            results,
+            data.frame(
+              Species = respName,
+              NicheBreadth = niche_breadth,
+              Occurrences = num_occ,
+              LogOccurrences = log_occ,
+              Bootstrap = b,
+              Algorithm = algo,
+              PAStrategy = pa_strat,
+              PANumber = pa_mult,
+              MeanSuitability = mean_suit,
+              SuitableArea = suitable_area,
+              SchoenersD = D_val,
+              ElevationCentroid = elev_cent
+            )
+          )
+        }
       }
     }
   }
 }
 
-write.csv(results, "./testFiles/SDM_results_for_LMM.csv", row.names = FALSE)
+write.csv(results, "./data/SDM_results_for_LMM.csv", row.names = FALSE)

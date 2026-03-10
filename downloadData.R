@@ -29,7 +29,15 @@ species_info <- tibble(
     "Salix petrophila",
     "Carex spectabilis",
     "Carex arapahoensis",
-    "Carex perglobosa"
+    "Carex perglobosa",
+    "Juncus drummondii",
+    "Pseudoroegneria spicata",
+    "Bistorta vivipara",
+    "Campanula rotundifolia",
+    "Artemisia tridentata",
+    "Amelanchier utahensis",
+    "Pinus edulis",
+    "Pinus longaeva"
   ),
   taxon_key = c(
     5384754,
@@ -43,7 +51,15 @@ species_info <- tibble(
     5372756,
     2723145,
     2722910,
-    2723300
+    2723300,
+    2701717,
+    2705699,
+    2889299,
+    5410907,
+    9396703,
+    3023964,
+    5285796,
+    5285258
   )
 )
 
@@ -101,7 +117,7 @@ message("Species download complete.")
 
 message("Downloading WorldClim climate data...")
 
-bio <- worldclim_global(var = "bio", res = 5, path = "climate/")
+bio <- worldclim_global(var = "bio", res = 2.5, path = "climate/")
 
 rocky_vect <- vect(rocky_poly)
 
@@ -115,7 +131,7 @@ saveRDS(myExpl, "data/myExpl.rds")
 
 message("Downloading elevation data...")
 
-elev <- worldclim_global(var = "elev", res = 5, path = "climate/")
+elev <- worldclim_global(var = "elev", res = 2.5, path = "climate/")
 
 elev_rocky <- crop(elev, rocky_vect)
 elev_rocky <- mask(elev_rocky, rocky_vect)

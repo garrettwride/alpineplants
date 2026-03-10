@@ -172,6 +172,19 @@ niche_metrics <- species_df %>%
   unnest(metrics)
 
 niche_metrics <- niche_metrics %>%
+  rowwise() %>%
+  mutate(
+    Abundance = length(Data$resp.xy$decimalLongitude)
+  ) %>%
+  ungroup()
+
+niche_metrics <- niche_metrics %>%
+  mutate(
+    logAbundance = log10(Abundance)
+  ) %>%
+  ungroup()
+
+niche_metrics <- niche_metrics %>%
   mutate(
     Elev_z = as.numeric(scale(ElevSD)),
     Clim_z = as.numeric(scale(ClimDispersion)),
@@ -191,26 +204,27 @@ niche_results <- niche_metrics %>%
     Specialization = -NicheBreadth
   )
 
-species_df <- species_df %>%
-  left_join(
-    niche_metrics %>% select(Species, NicheBreadth),
-    by = "Species"
+correction_model <- lm(NicheBreadth ~ log10(Abundance), data = niche_results)
+niche_results$NicheBreadth_Corrected <- residuals(correction_model)
+
+niche_results <- niche_results %>%
+  mutate(
+    Niche_Final_z = as.numeric(scale(NicheBreadth_Corrected)),
+    Specialization_Rank = -Niche_Final_z
   )
 
-species_df <- species_df %>%
-  rowwise() %>%
-  mutate(
-    Abundance = length(Data$resp.xy$decimalLongitude)
-  ) %>%
-  ungroup()
-  
+species_df <- niche_results %>%
+    select(Species, Niche_Final_z)
 
 View(species_df)
 
+shapiro.test(species_df$Niche_Final_z)
 shapiro.test(species_df$NicheBreadth)
 shapiro.test(species_df$Abundance)
 
 cor.test(species_df$Abundance, species_df$NicheBreadth, method = "pearson")
+cor.test(niche_results$Abundance, species_df$Niche_Final_z, method = "pearson")
+
 
 cor.test(species_df$Abundance, niche_results$Elev_z, method = "pearson")
 cor.test(species_df$Abundance, niche_results$Clim_z, method = "pearson")

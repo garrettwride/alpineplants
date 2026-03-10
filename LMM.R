@@ -21,6 +21,47 @@ Create_R_Graph <- function(r2_object, title) {
 }
 
 
+Run_LMM <- function(biomod_data, responce_variable) {
+  lmer_output <- lmer(as.formula(paste0(responce_variable, " ~ 
+                    NicheBreadth + Algorithm + PAStrategy + PANumber+ LogOccurrences +
+                    NicheBreadth:Algorithm + 
+                    NicheBreadth:PAStrategy + 
+                    NicheBreadth:PANumber + 
+                    NicheBreadth:LogOccurrences +
+                    (1 | Species) + (1 | Species:Bootstrap)")),
+                    data = biomod_data,
+                    REML = FALSE )
+  
+  return(lmer_output)
+}
+
+
+Compute_and_Graph_EMTrends <- function(fixed_var, schoener_lmer, meansuit_lmer, suitarea_lmer,elevcentroid_lmer, output_file_path) {
+  emt_schoener = emtrends(schoener_lmer, as.formula(paste0("~", fixed_var)), var = "NicheBreadth")
+  emt_meansuit = emtrends(meansuit_lmer, as.formula(paste0("~", fixed_var)), var = "NicheBreadth")
+  emt_suitarea = emtrends(suitarea_lmer, as.formula(paste0("~", fixed_var)), var = "NicheBreadth")
+  emt_elevcentroid = emtrends(elevcentroid_lmer, as.formula(paste0("~", fixed_var)), var = "NicheBreadth")
+  
+  schoener_df = as.data.frame(emt_schoener) %>%
+    mutate(ResponseVariable = "Schoener's D")
+  
+  meansuit_df = as.data.frame(emt_meansuit) %>%
+    mutate(ResponseVariable = "Mean Suitablilty")
+  
+  suitarea_df = as.data.frame(emt_suitarea) %>%
+    mutate(ResponseVariable = "Suitable Area")
+  
+  elevcentroid_df = as.data.frame(emt_elevcentroid) %>%
+    mutate(ResponseVariable = "Elevation Centroid")
+  
+  combined_df = bind_rows(schoener_df, meansuit_df, suitarea_df, elevcentroid_df)
+  combined_df
+  write.csv(combined_df, file = output_file_path, row.names = FALSE)
+  
+  return(combined_df)
+}
+
+
 biomod_data <- read.csv("./testFiles/SDM_results_for_LMM_2.csv")
 
 # Normalize MeanSuitability, SuitableArea, SchoenersD, ElevationCentroid
@@ -41,41 +82,16 @@ mean_elevation_centroid <- mean(biomod_data$ElevationCentroid)
 sd_elevation_centroid <- sd(biomod_data$ElevationCentroid)
 biomod_data$normalizedElevationCentroid <- scale(biomod_data$ElevationCentroid)
 
+
 # for SPECIALISTS VS GENERALISTS as a whole: 
 # Random Effects = Species, Bootstrap
 # Fixed Effects = NicheBreadth, Algorithm, PAStrategy, PANumber
 
-# Response Variable = Schoener's D
-schoener_resp_var_lmer <- lmer(normalizedSchoenersD ~ 
-        NicheBreadth + Algorithm + PAStrategy + PANumber +
-        NicheBreadth:Algorithm + NicheBreadth:Occurrences +
-        (1 | Species) + (1 | Species:Bootstrap),
-        data = biomod_data,
-        REML = FALSE )
+schoener_resp_var_lmer <- Run_LMM(biomod_data, "normalizedSchoenersD") 
+meansuit_resp_var_lmer <- Run_LMM(biomod_data, "normalizedMeanSuitability")
+suitarea_resp_var_lmer <- Run_LMM(biomod_data, "normalizedSuitableArea")
+elevcentroid_resp_var_lmer <- Run_LMM(biomod_data, "normalizedElevationCentroid")
 
-# Response Variable = Mean Suitability
-meansuit_resp_var_lmer <- lmer(normalizedMeanSuitability ~ 
-        NicheBreadth + Algorithm + PAStrategy + PANumber +
-        NicheBreadth:Algorithm + NicheBreadth:Occurrences +
-        (1 | Species) + (1 | Species:Bootstrap),
-        data = biomod_data,
-        REML = FALSE )
-
-# Response Variable = Suitable Area
-suitarea_resp_var_lmer <- lmer(normalizedSuitableArea ~ 
-        NicheBreadth + Algorithm  + PAStrategy + PANumber +
-        NicheBreadth:Algorithm +  NicheBreadth:Occurrences +
-        (1 | Species) + (1 | Species:Bootstrap),
-        data = biomod_data,
-        REML = FALSE )
-
-# Response Variable =  Elevation Centroid
-elevcentroid_resp_var_lmer <- lmer(normalizedElevationCentroid ~ 
-        NicheBreadth + Algorithm + PAStrategy + PANumber + 
-        NicheBreadth:Algorithm + NicheBreadth:Occurrences +
-        (1 | Species) + (1 | Species:Bootstrap),
-        data = biomod_data,
-        REML = FALSE )
 
 # summary(schoener_resp_var)
 # summary(meansuit_resp_var)
@@ -107,66 +123,29 @@ elevcentroid_plot <- Create_R_Graph(elevcentroid_var_r2, "Marginal R² for Eleva
 
 grid.arrange(schoener_plot, meansuit_plot, suitarea_plot, elevcentroid_plot, ncol = 2, nrow = 2)
 
-# CONDITIONAL calculation of PERCENT VARIANCE (fixed AND random variables)
-schoener_resp_var_lmer
+# CONDITIONAL calculation of PERCENT VARIANCE (fixed AND random variables) <- this is no longer correct(change)
 
-# How each ResponceVariable changes when NicheBreadth changes, within each Bootstrap
-#emt_bootstrap_schoener = emtrends(schoener_resp_var_lmer, ~Species:Bootstrap, var = "NicheBreadth")
-#emt_bootstrap_meansuit = emtrends(meansuit_resp_var_lmer, ~Species:Bootstrap, var = "NicheBreadth")
-#emt_bootstrap_suitarea = emtrends(suitarea_resp_var_lmer, ~Species:Bootstrap, var = "NicheBreadth")
-#emt_bootstrap_elevcentroid = emtrends(elevcentroid_resp_var_lmer, ~Species:Bootstrap, var = "NicheBreadth")
 
-# How each ResponceVariable changes when NicheBreadth changes, within each Algorithm
-emt_algorithm_schoener = emtrends(schoener_resp_var_lmer, ~Algorithm, var = "NicheBreadth")
-emt_algorithm_meansuit = emtrends(meansuit_resp_var_lmer, ~Algorithm, var = "NicheBreadth")
-emt_algorithm_suitarea = emtrends(suitarea_resp_var_lmer, ~Algorithm, var = "NicheBreadth")
-emt_algorithm_elevcentroid = emtrends(elevcentroid_resp_var_lmer, ~Algorithm, var = "NicheBreadth")
-
-# How each ResponceVariable changes when NicheBreadth changes, within each PAStrategy
-emt_paStrategy_schoener = emtrends(schoener_resp_var_lmer, ~PAStrategy, var = "NicheBreadth")
-emt_paStrategy_meansuit = emtrends(meansuit_resp_var_lmer, ~PAStrategy, var = "NicheBreadth")
-emt_paStrategy_suitarea = emtrends(suitarea_resp_var_lmer, ~PAStrategy, var = "NicheBreadth")
-emt_paStrategy_elevcentroid = emtrends(elevcentroid_resp_var_lmer, ~PAStrategy, var = "NicheBreadth")
-
-# How each ResponceVariable changes when NicheBreadth changes, within each PANumber
-emt_paNumber_schoener = emtrends(schoener_resp_var_lmer, ~PANumber, var = "NicheBreadth")
-emt_paNumber_meansuit = emtrends(meansuit_resp_var_lmer, ~PANumber, var = "NicheBreadth")
-emt_paNumber_suitarea = emtrends(suitarea_resp_var_lmer, ~PANumber, var = "NicheBreadth")
-emt_paNumber_elevcentroid = emtrends(elevcentroid_resp_var_lmer, ~PANumber, var = "NicheBreadth")
-
-# uses asymptotic confidence intervals (normal distribution)
-schoener_df = as.data.frame(emt_algorithm_schoener) %>%
-  mutate(ResponseVariable = "Schoener's D")
-schoener_df
-
-meansuit_df = as.data.frame(emt_algorithm_meansuit) %>%
-  mutate(ResponseVariable = "Mean Suitablilty")
-
-suitarea_df = as.data.frame(emt_algorithm_suitarea) %>%
-  mutate(ResponseVariable = "Suitable Area")
-
-elevcentroid_df = as.data.frame(emt_algorithm_elevcentroid) %>%
-  mutate(ResponseVariable = "Elevation Centroid")
-
-combined_bootstrap_df = bind_rows(schoener_df, meansuit_df, suitarea_df, elevcentroid_df)
-
-write.csv(combined_bootstrap_df, file = "LMMResults/combined_bootstrap_df.csv", row.names = FALSE)
+algorithm_emtrends_results <- Compute_and_Graph_EMTrends("Algorithm", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, "LMMResults/algorithm_emtrends_results.csv")
+paStrategy_emtrends_results <- Compute_and_Graph_EMTrends("PAStrategy", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, "LMMResults/paStrategy_emtrends_results.csv")
+paNumber_emtrends_results <- Compute_and_Graph_EMTrends("PANumber", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, "LMMResults/paNumber_emtrends_results.csv")
 
 
 
-ggplot() +
-  geom_point(
-    data = biomod_data,
-    aes(NicheBreadth, SchoenersD, color = Algorithm),
-    alpha = 0.15
-  ) +
-  geom_point(
-    data = combined_bootstrap_df,
-    aes(NicheBreadth.trend, Algorithm, color = ResponseVariable),
-    size = 4
-  ) +
-  geom_errorbarh(data = combined_bootstrap_df, aes(xmin = asymp.LCL, xmax = asymp.UCL), width = 0.2) +
-  geom_vline(xintercept = 0, linetype = "dashed") +
-  labs(x = "NicheBreadth Effect (Slope)", y = "Algorithm", title = "Effect of NicheBreadth on Response Variables by Algorithm")
+#graph wrong rn
+# ggplot() +
+#   geom_point(
+#     data = biomod_data,
+#     aes(NicheBreadth, SchoenersD, color = Algorithm),
+#     alpha = 0.15
+#   ) +
+#   geom_point(
+#     data = combined_bootstrap_df,
+#     aes(NicheBreadth.trend, Algorithm, color = ResponseVariable),
+#     size = 4
+#   ) +
+#   geom_errorbarh(data = combined_bootstrap_df, aes(xmin = asymp.LCL, xmax = asymp.UCL), width = 0.2) +
+#   geom_vline(xintercept = 0, linetype = "dashed") +
+#   labs(x = "NicheBreadth Effect (Slope)", y = "Algorithm", title = "Effect of NicheBreadth on Response Variables by Algorithm")
 
 

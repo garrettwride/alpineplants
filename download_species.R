@@ -4,26 +4,26 @@ library(dplyr)
 library(sf)
 library(tidyr)
 
-#check diff between using occ_search and occ_download
-#maybe add basisOfRecord, remove duplicates
+#occ_download > occ_download_wait(key) > occ_download_get(zip_file) > occ_download_import(zip_file)
 
-#reads .shp into sf object
 rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
 rocky_wkt <- st_as_text(st_union(rocky_poly))
 
 clean_and_get_occurrences <- function(taxon_key, species_name, rocky_poly, rocky_wkt) {
-
-  occ <- occ_search(
-    taxonKey = taxon_key, 
-    hasCoordinate = TRUE,
-    hasGeospatialIssue = FALSE, 
-    geometry = rocky_wkt, 
-    limit = 100000
+  
+  key <- occ_download(
+    pred("taxonKey", taxon_key), 
+    pred("hasCoordinate", TRUE),
+    pred("hasGeospatialIssue", FALSE), 
+    pred("geometry", rocky_wkt), 
+    format = "SIMPLE_CSV"
   )
   
-  # Extract the data frame
-  df <- occ$data
+  occ_download_wait(key)
+  zip_file <- occ_download_get(key, overwrite = TRUE)
+
+  df <- occ_download_import(zip_file)
   
   if(nrow(df) == 0) {
     stop("no record found")
@@ -38,37 +38,22 @@ clean_and_get_occurrences <- function(taxon_key, species_name, rocky_poly, rocky
               "zeros"),
   )
   
-  #only keep good points (clean_coords() just evaluates)
-  #so each row has a geometry point
   df_cleaned <- df[cleaned$.summary == TRUE, ]
   
-  #if remove dupes, do here
-  
-  #st_as_sf converts foreign object to a spatial object
   occ_sf <- st_as_sf(
     df_cleaned,
     coords = c("decimalLongitude", "decimalLatitude"),
-    remove = FALSE, #do not remove coords from df
-    crs = 4326 #same for each?
+    remove = FALSE, 
+    crs = 4326 
   )
   
-  #only keep points inside polygon (only rocky mountains)
-  #don't need bc of gbif geometry parameter,
-  #but there may be differences bc gbif uses its own spatial engine
   occ_rocky <- occ_sf[st_within(occ_sf, rocky_poly, sparse = FALSE), ]
   
-  #remove spatial geo col, back to normal df
   occ_rocky_df <- st_drop_geometry(occ_rocky)
   
   #BIOMOD inputs:
-  
-  # Presence points
   resp.var <- rep(1, nrow(occ_rocky_df))
-  
-  # Coordinates
   resp.xy <- occ_rocky_df[, c("decimalLongitude", "decimalLatitude")]
-  
-  # Name for BIOMOD
   resp.name <- species_name
   
   return(list(
@@ -76,8 +61,9 @@ clean_and_get_occurrences <- function(taxon_key, species_name, rocky_poly, rocky
     resp.xy = resp.xy,
     resp.name = resp.name
   ))
-
+  
 } 
+
 
 #graminoids:
 showy_sedge <- clean_and_get_occurrences(2723145, "Carex spectabilis", rocky_poly, rocky_wkt)
@@ -90,6 +76,7 @@ baltic_rush <- clean_and_get_occurrences(2702048, "Juncus balticus", rocky_poly,
 spiked_rush <- clean_and_get_occurrences(2700795, "Luzula spicata", rocky_poly, rocky_wkt)
 single_spike_sedge <- clean_and_get_occurrences(2721925, "Carex scirpoidea", rocky_poly, rocky_wkt)
 tufted_hair_grass <- clean_and_get_occurrences(8059811, "Deschampsia cespitosa", rocky_poly, rocky_wkt)
+tufted_hair_grass$resp.xy
 
 #herbs:
 moss_campion <- clean_and_get_occurrences(5384754, "Silene acaulis", rocky_poly, rocky_wkt)

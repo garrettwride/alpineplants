@@ -1,0 +1,41 @@
+Linear mixed model fit by maximum likelihood  ['lmerMod']
+Formula: SchoenersD ~ NicheBreadth + Algorithm + PAStrategy + PANumber +  
+    LogOccurrences + NicheBreadth:Algorithm + NicheBreadth:PAStrategy +  
+    NicheBreadth:PANumber + NicheBreadth:LogOccurrences + (1 |      Species) + (1 | Species:Bootstrap)
+   Data: biomod_data
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+  -7568.7   -7445.6    3803.3   -7606.7      4781 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.1818 -0.5351  0.0626  0.5647  4.7528 
+
+Random effects:
+ Groups            Name        Variance Std.Dev.
+ Species:Bootstrap (Intercept) 0.000000 0.00000 
+ Species           (Intercept) 0.005039 0.07099 
+ Residual                      0.011773 0.10850 
+Number of obs: 4800, groups:  Species:Bootstrap, 200; Species, 20
+
+Fixed effects:
+                                Estimate Std. Error t value
+(Intercept)                    0.5846284  0.1517928   3.851
+NicheBreadth                   0.0795732  0.0567395   1.402
+AlgorithmGLM                  -0.0118346  0.0044296  -2.672
+AlgorithmMAXENT               -0.1667047  0.0044296 -37.634
+AlgorithmRF                   -0.0341483  0.0044296  -7.709
+PAStrategyrandom              -0.0849938  0.0031322 -27.135
+PANumber3                     -0.0457865  0.0038362 -11.935
+PANumber5                     -0.0702810  0.0038362 -18.321
+LogOccurrences                 0.0802406  0.0459365   1.747
+NicheBreadth:AlgorithmGLM      0.0174196  0.0022703   7.673
+NicheBreadth:AlgorithmMAXENT  -0.0008044  0.0022703  -0.354
+NicheBreadth:AlgorithmRF      -0.0199826  0.0022703  -8.802
+NicheBreadth:PAStrategyrandom  0.0164146  0.0016054  10.225
+NicheBreadth:PANumber3         0.0016466  0.0019662   0.837
+NicheBreadth:PANumber5         0.0011104  0.0019662   0.565
+NicheBreadth:LogOccurrences   -0.0221303  0.0166942  -1.326
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')
+

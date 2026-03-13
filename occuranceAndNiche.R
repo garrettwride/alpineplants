@@ -6,6 +6,8 @@ library(CoordinateCleaner)
 library(tidyr)
 library(purrr)
 library(geodata)
+library(gridExtra)
+
 
 ## Get Rocky Mountain Polygon
 rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
@@ -13,7 +15,7 @@ rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrence
 rocky_wkt <- st_as_text(st_union(rocky_poly))
 
 ## Get Environmental Data
-bio <- worldclim_global(var = "bio", res = 10, path = "./")
+bio <- worldclim_global(var = "bio", res = 5, path = "./")
 
 bio_rocky <- crop(bio, rocky_poly)
 bio_rocky <- mask(bio_rocky, rocky_poly)
@@ -21,7 +23,7 @@ bio_rocky <- mask(bio_rocky, rocky_poly)
 myExpl <- bio_rocky[[c(1, 3, 4, 12, 15)]]
 
 # Get elevation data
-elev <- worldclim_global(var = "elev", res = 10, path = "./climate/")
+elev <- worldclim_global(var = "elev", res = 5, path = "./climate/")
 
 elev_rocky <- crop(elev, rocky_poly)
 elev_rocky <- mask(elev_rocky, rocky_poly)
@@ -40,7 +42,15 @@ species_info <- tibble(
     "Salix petrophila",
     "Carex spectabilis",
     "Carex arapahoensis",
-    "Carex perglobosa"
+    "Carex perglobosa",
+    "Juncus drummondii",
+    "Pseudoroegneria spicata",
+    "Bistorta vivipara",
+    "Campanula rotundifolia",
+    "Artemisia tridentata",
+    "Amelanchier utahensis",
+    "Pinus edulis",
+    "Pinus longaeva"
   ),
   taxon_key = c(
     5384754,
@@ -54,7 +64,15 @@ species_info <- tibble(
     5372756,
     2723145,
     2722910,
-    2723300
+    2723300,
+    2701717,
+    2705699,
+    2889299,
+    5410907,
+    9396703,
+    3023964,
+    5285796,
+    5285258
   )
 )
 
@@ -120,7 +138,6 @@ species_df <- species_info %>%
     )
   )
 
-print(species_df)
 calculate_niche_metrics <- function(species_obj, climate_stack, elev_raster) {
   
   pts <- vect(species_obj$resp.xy,
@@ -193,7 +210,7 @@ niche_metrics <- niche_metrics %>%
     Specialization = -NicheBreadth
   )
 
-niche_results <- niche_metrics %>%
+Vi <- niche_metrics %>%
   mutate(
     Elev_z = scale(ElevSD),
     Clim_z = scale(ClimDispersion),
@@ -213,19 +230,71 @@ niche_results <- niche_results %>%
     Specialization_Rank = -Niche_Final_z
   )
 
-species_df <- niche_results %>%
+niche_results <- niche_results %>%
     select(Species, Niche_Final_z)
 
-View(species_df)
+View(niche_results)
 
-shapiro.test(species_df$Niche_Final_z)
-shapiro.test(species_df$NicheBreadth)
-shapiro.test(species_df$Abundance)
+shapiro.test(niche_results$Niche_Final_z)
+shapiro.test(niche_results$NicheBreadth)
+shapiro.test(niche_results$Abundance)
 
-cor.test(species_df$Abundance, species_df$NicheBreadth, method = "pearson")
-cor.test(niche_results$Abundance, species_df$Niche_Final_z, method = "pearson")
+cor.test(niche_results$Abundance, niche_results$NicheBreadth, method = "pearson")
+cor.test(niche_results$Abundance, niche_results$Niche_Final_z, method = "pearson")
 
 
-cor.test(species_df$Abundance, niche_results$Elev_z, method = "pearson")
-cor.test(species_df$Abundance, niche_results$Clim_z, method = "pearson")
-cor.test(species_df$Abundance, niche_results$Geo_z, method = "pearson")
+cor.test(niche_results$Abundance, niche_results$Elev_z, method = "pearson")
+cor.test(niche_results$Abundance, niche_results$Clim_z, method = "pearson")
+cor.test(niche_results$Abundance, niche_results$Geo_z, method = "pearson")
+
+#Occurrence mapping
+
+brown_spectrum <- colorRampPalette(c("bisque", "burlywood1", "sienna3", "saddlebrown", "grey10"))(100)
+
+png("Alpine_Niche_Comparison.png", width = 12, height = 7, units = "in", res = 300)
+layout(matrix(c(1, 2, 3), nrow = 1), widths = c(1, 1, 0.4))
+par(bg = "white", oma = c(2, 2, 8, 2))
+
+# Campanula rotundifolia, niche score:1.471253665, occurrences:2112
+par(mar = c(4, 4, 4, 1))
+herb_campanula_data <- clean_and_get_occurrences(5410907, "Campanula rotundifolia", rocky_poly, rocky_wkt)
+herb_campanula_plot <- plot(elev_rocky,
+                            main = "Generalist:\nCampanula rotundifolia",
+                            col = brown_spectrum,
+                            xlab = "Longitude",
+                            ylab = "Latitude",
+                            legend = FALSE)
+points(herb_campanula_data$resp.xy, col="#529DFF80", pch=16, cex=0.35)
+
+# Delphinium occidentale, niche score:-1.418464385, occurrences:1611
+par(mar = c(4, 4, 6, 1))
+herb_delphinium_data <- clean_and_get_occurrences(3033713, "Delphinium occidentale", rocky_poly, rocky_wkt)
+herb_delphinium_plot <- plot(elev_rocky,
+                             main = "Specialist:\nDelphinium occidentale",
+                             col = brown_spectrum,
+                             xlab = "Longitude",
+                             ylab = "Latitude",
+                             legend = FALSE)
+points(herb_delphinium_data$resp.xy, col="#529DFF80", pch=16, cex=0.35)
+
+par(mar = c(4, 0, 4, 0)) 
+plot.new()
+plot.window(xlim = c(0, 1), ylim = c(0, 1))
+
+plot(elev_rocky, col = brown_spectrum, legend.only = TRUE, add = TRUE,
+     smallplot = c(0.2, 0.35, 0.3, 0.75),
+     axis.args = list(cex.axis = 0.8))
+text(x = 0.3, y = 0.8, labels = "Elev (m)", font = 2, cex = 1)
+
+points(x = 0.2, y = 0.15, col = "#529DFF80", pch = 16, cex = 1.5, xpd = TRUE)
+text(x = 0.25, y = 0.15, labels = "1 dot =\n1 occurrence", 
+     adj = 0, cex = 0.9, xpd = TRUE)
+
+mtext("Alpine Plant Niche Breadth Comparison", 
+      outer = TRUE, side = 3, line = 3, cex = 2, font = 2)
+
+dev.off()
+
+layout(1)
+
+

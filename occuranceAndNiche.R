@@ -249,52 +249,52 @@ cor.test(niche_results$Abundance, niche_results$Geo_z, method = "pearson")
 
 #Occurrence mapping
 
-brown_spectrum <- colorRampPalette(c("bisque", "burlywood1", "sienna3", "saddlebrown", "grey10"))(100)
-
-png("Alpine_Niche_Comparison.png", width = 12, height = 7, units = "in", res = 300)
-layout(matrix(c(1, 2, 3), nrow = 1), widths = c(1, 1, 0.4))
-par(bg = "white", oma = c(2, 2, 8, 2))
-
-# Campanula rotundifolia, niche score:1.471253665, occurrences:2112
-par(mar = c(4, 4, 4, 1))
-herb_campanula_data <- clean_and_get_occurrences(5410907, "Campanula rotundifolia", rocky_poly, rocky_wkt)
-herb_campanula_plot <- plot(elev_rocky,
-                            main = "Generalist:\nCampanula rotundifolia",
-                            col = brown_spectrum,
-                            xlab = "Longitude",
-                            ylab = "Latitude",
-                            legend = FALSE)
-points(herb_campanula_data$resp.xy, col="#529DFF80", pch=16, cex=0.35)
-
-# Delphinium occidentale, niche score:-1.418464385, occurrences:1611
-par(mar = c(4, 4, 6, 1))
-herb_delphinium_data <- clean_and_get_occurrences(3033713, "Delphinium occidentale", rocky_poly, rocky_wkt)
-herb_delphinium_plot <- plot(elev_rocky,
-                             main = "Specialist:\nDelphinium occidentale",
-                             col = brown_spectrum,
-                             xlab = "Longitude",
-                             ylab = "Latitude",
-                             legend = FALSE)
-points(herb_delphinium_data$resp.xy, col="#529DFF80", pch=16, cex=0.35)
-
-par(mar = c(4, 0, 4, 0)) 
-plot.new()
-plot.window(xlim = c(0, 1), ylim = c(0, 1))
-
-plot(elev_rocky, col = brown_spectrum, legend.only = TRUE, add = TRUE,
-     smallplot = c(0.2, 0.35, 0.3, 0.75),
-     axis.args = list(cex.axis = 0.8))
-text(x = 0.3, y = 0.8, labels = "Elev (m)", font = 2, cex = 1)
-
-points(x = 0.2, y = 0.15, col = "#529DFF80", pch = 16, cex = 1.5, xpd = TRUE)
-text(x = 0.25, y = 0.15, labels = "1 dot =\n1 occurrence", 
-     adj = 0, cex = 0.9, xpd = TRUE)
-
-mtext("Alpine Plant Niche Breadth Comparison", 
-      outer = TRUE, side = 3, line = 3, cex = 2, font = 2)
-
-dev.off()
-
-layout(1)
+# brown_spectrum <- colorRampPalette(c("bisque", "burlywood1", "sienna3", "saddlebrown", "grey10"))(100)
+# 
+# png("Alpine_Niche_Comparison.png", width = 12, height = 7, units = "in", res = 300)
+# layout(matrix(c(1, 2, 3), nrow = 1), widths = c(1, 1, 0.4))
+# par(bg = "white", oma = c(2, 2, 8, 2))
+# 
+# # Campanula rotundifolia, niche score:1.471253665, occurrences:2112
+# par(mar = c(4, 4, 4, 1))
+# herb_campanula_data <- clean_and_get_occurrences(5410907, "Campanula rotundifolia", rocky_poly, rocky_wkt)
+# herb_campanula_plot <- plot(elev_rocky,
+#                             main = "Generalist:\nCampanula rotundifolia",
+#                             col = brown_spectrum,
+#                             xlab = "Longitude",
+#                             ylab = "Latitude",
+#                             legend = FALSE)
+# points(herb_campanula_data$resp.xy, col="#529DFF80", pch=16, cex=0.35)
+# 
+# # Delphinium occidentale, niche score:-1.418464385, occurrences:1611
+# par(mar = c(4, 4, 6, 1))
+# herb_delphinium_data <- clean_and_get_occurrences(3033713, "Delphinium occidentale", rocky_poly, rocky_wkt)
+# herb_delphinium_plot <- plot(elev_rocky,
+#                              main = "Specialist:\nDelphinium occidentale",
+#                              col = brown_spectrum,
+#                              xlab = "Longitude",
+#                              ylab = "Latitude",
+#                              legend = FALSE)
+# points(herb_delphinium_data$resp.xy, col="#529DFF80", pch=16, cex=0.35)
+# 
+# par(mar = c(4, 0, 4, 0)) 
+# plot.new()
+# plot.window(xlim = c(0, 1), ylim = c(0, 1))
+# 
+# plot(elev_rocky, col = brown_spectrum, legend.only = TRUE, add = TRUE,
+#      smallplot = c(0.2, 0.35, 0.3, 0.75),
+#      axis.args = list(cex.axis = 0.8))
+# text(x = 0.3, y = 0.8, labels = "Elev (m)", font = 2, cex = 1)
+# 
+# points(x = 0.2, y = 0.15, col = "#529DFF80", pch = 16, cex = 1.5, xpd = TRUE)
+# text(x = 0.25, y = 0.15, labels = "1 dot =\n1 occurrence", 
+#      adj = 0, cex = 0.9, xpd = TRUE)
+# 
+# mtext("Alpine Plant Niche Breadth Comparison", 
+#       outer = TRUE, side = 3, line = 3, cex = 2, font = 2)
+# 
+# dev.off()
+# 
+# layout(1)
 
 

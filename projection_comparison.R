@@ -6,6 +6,14 @@ library(purrr)
 library(biomod2)
 install.packages("R.utils")
 install.packages("randomForest")
+install.packages(c('dismo','rJava'), repos='https://cloud.r-project.org')
+
+library(dismo)
+library(rJava)
+
+system.file("java", package="dismo")
+list.files(system.file("java", package="dismo"))
+
 
 #expl = environment data
 species_df <- readRDS("data/species_occurrences.rds")

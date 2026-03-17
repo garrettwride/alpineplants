@@ -1,41 +1,42 @@
 Linear mixed model fit by maximum likelihood  ['lmerMod']
 Formula: MeanSuitability ~ NicheBreadth + Algorithm + PAStrategy + PANumber +  
     LogOccurrences + NicheBreadth:Algorithm + NicheBreadth:PAStrategy +  
-    NicheBreadth:PANumber + NicheBreadth:LogOccurrences + (1 |      Species) + (1 | Species:Bootstrap)
+    NicheBreadth:PANumber + NicheBreadth:LogOccurrences + (1 |  
+    Species) + (1 | Species:Bootstrap)
    Data: biomod_data
 
       AIC       BIC    logLik -2*log(L)  df.resid 
-  55839.4   55962.4  -27900.7   55801.4      4781 
+  61703.6   61828.8  -30832.8   61665.6      5357 
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--2.8194 -0.6204  0.0175  0.5943  6.9593 
+-4.0461 -0.5975  0.0009  0.5585  6.7575 
 
 Random effects:
  Groups            Name        Variance Std.Dev.
  Species:Bootstrap (Intercept)    0      0.00   
- Species           (Intercept) 4532     67.32   
- Residual                      6412     80.08   
-Number of obs: 4800, groups:  Species:Bootstrap, 200; Species, 20
+ Species           (Intercept) 3650     60.42   
+ Residual                      5472     73.97   
+Number of obs: 5376, groups:  Species:Bootstrap, 224; Species, 28
 
 Fixed effects:
                                Estimate Std. Error t value
-(Intercept)                     33.7656   143.6707   0.235
-NicheBreadth                    21.2385    53.6975   0.396
-AlgorithmGLM                   -13.1823     3.2692  -4.032
-AlgorithmMAXENT                -30.5642     3.2692  -9.349
-AlgorithmRF                    -34.3072     3.2692 -10.494
-PAStrategyrandom              -137.3651     2.3116 -59.423
-PANumber3                      -65.2775     2.8312 -23.057
-PANumber5                      -87.4250     2.8312 -30.879
-LogOccurrences                 102.5776    43.4839   2.359
-NicheBreadth:AlgorithmGLM       -0.2595     1.6756  -0.155
-NicheBreadth:AlgorithmMAXENT    -8.7477     1.6756  -5.221
-NicheBreadth:AlgorithmRF        -8.7623     1.6756  -5.229
-NicheBreadth:PAStrategyrandom   -4.0776     1.1848  -3.442
-NicheBreadth:PANumber3          -4.9119     1.4511  -3.385
-NicheBreadth:PANumber5          -6.3623     1.4511  -4.385
-NicheBreadth:LogOccurrences     -3.1869    15.8029  -0.202
+(Intercept)                    223.3366   101.4453   2.202
+NicheBreadth                    15.4066    28.7299   0.536
+AlgorithmGLM                    -9.9248     2.8535  -3.478
+AlgorithmMAXENT                -25.6282     2.8535  -8.981
+AlgorithmRF                    -32.0680     2.8535 -11.238
+PAStrategyrandom              -129.3745     2.0177 -64.119
+PANumber3                      -69.3569     2.4712 -28.066
+PANumber5                      -93.5277     2.4712 -37.847
+LogOccurrences                  40.7116    31.0375   1.312
+NicheBreadth:AlgorithmGLM        2.5195     1.1649   2.163
+NicheBreadth:AlgorithmMAXENT    -3.4003     1.1649  -2.919
+NicheBreadth:AlgorithmRF        -5.8560     1.1649  -5.027
+NicheBreadth:PAStrategyrandom   -3.1227     0.8237  -3.791
+NicheBreadth:PANumber3          -6.6662     1.0088  -6.608
+NicheBreadth:PANumber5          -8.7469     1.0088  -8.670
+NicheBreadth:LogOccurrences      3.3423     9.3100   0.359
 optimizer (nloptwrap) convergence code: 0 (OK)
 boundary (singular) fit: see help('isSingular')
 

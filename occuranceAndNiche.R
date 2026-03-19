@@ -233,8 +233,6 @@ niche_results <- niche_results %>%
 niche_results <- niche_results %>%
     select(Species, Niche_Final_z)
 
-View(niche_results)
-
 shapiro.test(niche_results$Niche_Final_z)
 shapiro.test(niche_results$NicheBreadth)
 shapiro.test(niche_results$Abundance)
@@ -246,73 +244,3 @@ cor.test(niche_results$Abundance, niche_results$Niche_Final_z, method = "pearson
 cor.test(niche_results$Abundance, niche_results$Elev_z, method = "pearson")
 cor.test(niche_results$Abundance, niche_results$Clim_z, method = "pearson")
 cor.test(niche_results$Abundance, niche_results$Geo_z, method = "pearson")
-
-#Occurrence mapping
-
-us_states <- gadm(country="USA", level=1, path=tempdir())
-can_provinces <- gadm(country="CAN", level=1, path=tempdir())
-
-admin_lines <- rbind(us_states, can_provinces)
-admin_lines <- project(admin_lines, crs(elev_rocky))
-
-
-herb_campanula_data <- clean_and_get_occurrences(5410907, "Campanula rotundifolia", rocky_poly, rocky_wkt)
-herb_delphinium_data <- clean_and_get_occurrences(3033713, "Delphinium occidentale", rocky_poly, rocky_wkt)
-
-
-brown_spectrum <- colorRampPalette(c("bisque", "burlywood1", "sienna3", "saddlebrown", "grey10"))(100)
-
-
-png("Generalist_Map_Big.png", width = 10, height = 15, units = "in", res = 300)
-
-par(mar = c(10, 8, 12, 8), bg = "white")
-
-plot(elev_rocky,
-     main = "",
-     col = brown_spectrum,
-     xlab = "Longitude", ylab = "Latitude",
-     cex.lab = 1.5,
-     legend = TRUE,
-     plg = list(title = "Elev (m)", title.cex = 1.2, title.font = 2))
-
-mtext("Campanula rotundifolia (Generalist)", side = 3, line = 6, cex = 2, font = 2)
-mtext("Niche Breadth = 1.47", side = 3, line = 4, cex = 1.5)
-
-plot(admin_lines, add = TRUE, border = "gray40", lwd = 0.5)
-
-points(herb_campanula_data$resp.xy, col="#529DFF80", pch=16, cex=0.8)
-
-legend("bottomleft", 
-       legend = "=  1 occurrence",
-       inset = c(0.03, 0.05),
-       col = "#529DFF80", pch = 16, pt.cex = 1.2, cex = 1, bty = "n",
-       xpd = TRUE) # This is what allows it to be in the margin
-
-dev.off()
-
-png("Specialist_Map_Big.png", width = 10, height = 15, units = "in", res = 300)
-
-par(mar = c(10, 8, 12, 8), bg = "white")
-
-plot(elev_rocky,
-     main = "", 
-     col = brown_spectrum,
-     xlab = "Longitude", ylab = "Latitude",
-     cex.lab = 1.5,
-     legend = TRUE,
-     plg = list(title = "Elev (m)", title.cex = 1.2, title.font = 2))
-
-mtext("Delphinium occidentale (Specialist)", side = 3, line = 6, cex = 2, font = 2)
-mtext("Niche Breadth = -1.42", side = 3, line = 4, cex = 1.5)
-
-plot(admin_lines, add = TRUE, border = "gray40", lwd = 0.5)
-
-points(herb_delphinium_data$resp.xy, col="#529DFF80", pch=16, cex=0.8)
-
-legend("bottomleft", 
-       legend = "=  1 occurrence",
-       inset = c(0.03, 0.05), 
-       col = "#529DFF80", pch = 16, pt.cex = 1.2, cex = 1, bty = "n",
-       xpd = TRUE)
-
-dev.off()

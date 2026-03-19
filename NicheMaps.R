@@ -210,7 +210,7 @@ niche_metrics <- niche_metrics %>%
     Specialization = -NicheBreadth
   )
 
-Vi <- niche_metrics %>%
+niche_results <- niche_metrics %>%
   mutate(
     Elev_z = scale(ElevSD),
     Clim_z = scale(ClimDispersion),
@@ -221,9 +221,6 @@ Vi <- niche_metrics %>%
     Specialization = -NicheBreadth
   )
 
-correction_model <- lm(NicheBreadth ~ log10(Abundance), data = niche_results)
-niche_results$NicheBreadth_Corrected <- residuals(correction_model)
-
 niche_results <- niche_results %>%
   mutate(
     Niche_Final_z = as.numeric(scale(NicheBreadth_Corrected)),
@@ -233,19 +230,7 @@ niche_results <- niche_results %>%
 niche_results <- niche_results %>%
     select(Species, Niche_Final_z)
 
-View(niche_results)
 
-shapiro.test(niche_results$Niche_Final_z)
-shapiro.test(niche_results$NicheBreadth)
-shapiro.test(niche_results$Abundance)
-
-cor.test(niche_results$Abundance, niche_results$NicheBreadth, method = "pearson")
-cor.test(niche_results$Abundance, niche_results$Niche_Final_z, method = "pearson")
-
-
-cor.test(niche_results$Abundance, niche_results$Elev_z, method = "pearson")
-cor.test(niche_results$Abundance, niche_results$Clim_z, method = "pearson")
-cor.test(niche_results$Abundance, niche_results$Geo_z, method = "pearson")
 
 #Occurrence mapping
 

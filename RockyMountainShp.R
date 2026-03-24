@@ -4,12 +4,16 @@ library(sf)
 
 # How I got the region in the first place (download label areas from here: https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-physical-labels/)
 
-#labels50 <- st_read("~/Library/CloudStorage/OneDrive-BrighamYoungUniversity/rstudio/ne_50m_geography_regions_polys")
-#unique(labels50$NAME)
-#rockies <- labels50[grepl("Rocky Mountains", labels50$NAME, ignore.case=TRUE), ]
-#class(rockies)
-#plot(st_geometry(rockies), col = "darkgreen", main = "Rocky Mountains")
-#st_write(rockies, "~/Desktop/rocky_mountains.shp")
+# # Replace the file path with where the file is on your personal device
+# labels50 <- st_read("~/Library/CloudStorage/OneDrive-BrighamYoungUniversity/rstudio/ne_50m_geography_regions_polys")
+# unique(labels50$NAME)
+# rockies <- labels50[grepl("Rocky Mountains", labels50$NAME, ignore.case=TRUE), ]
+# class(rockies)
+
+
+# # Check that you got the right shape (should look kinda like a dinosaur)
+# plot(st_geometry(rockies), col = "darkgreen", main = "Rocky Mountains")
+# st_write(rockies, "~/Desktop/rocky_mountains.shp")
 
 
 # This is a map of the US and Canada rectangle. (need gadm files to run, not on git bc big)

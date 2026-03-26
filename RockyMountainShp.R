@@ -4,27 +4,33 @@ library(sf)
 
 # How I got the region in the first place (download label areas from here: https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-physical-labels/)
 
-# # Replace the file path with where the file is on your personal device
-# labels50 <- st_read("~/Library/CloudStorage/OneDrive-BrighamYoungUniversity/rstudio/ne_50m_geography_regions_polys")
-# unique(labels50$NAME)
-# rockies <- labels50[grepl("Rocky Mountains", labels50$NAME, ignore.case=TRUE), ]
-# class(rockies)
+# Replace the file path with where the downloaded file is on your personal device
+labels_download_file_path = "~/Library/CloudStorage/OneDrive-BrighamYoungUniversity/rstudio/ne_50m_geography_regions_polys"
+
+# Replace the file path with the location of the folder you created on your personal device
+final_shape_folder_path = "/Users/kristinbillings/Library/CloudStorage/OneDrive-BrighamYoungUniversity/rstudio/alpineplants/RockyMountainsRegion"
 
 
-# # Check that you got the right shape (should look kinda like a dinosaur)
-# plot(st_geometry(rockies), col = "darkgreen", main = "Rocky Mountains")
-# st_write(rockies, "~/Desktop/rocky_mountains.shp")
+labels50 <- st_read(labels_download_file_path)
+#unique(labels50$NAME)
+rockies <- labels50[grepl("Rocky Mountains", labels50$NAME, ignore.case=TRUE), ]
+class(rockies)
 
+# Check that you got the right shape (should look kinda like a dinosaur/rotting guitar)
+plot(st_geometry(rockies), col = "cyan", main = "Rocky Mountains")
 
-# This is a map of the US and Canada rectangle. (need gadm files to run, not on git bc big)
-# us <- gadm(country="USA", level=0, path=".")
-# can <- gadm(country="CAN", level=0, path=".")
-# map_data <- rbind(us, can)
-# my_box <- ext(-128, -103, 35, 60)
-# regional_map <- crop(mapData, myBox)
+# Save shape in folder
+new_rocky_shp_file_path = paste0(final_shape_folder_path,"/rocky_mountains.shp")
 
-rocky_mnt_poly <-st_read("./RockyMountainsRegion/rocky_mountains.shp")
-rocky_mnt_spat <- vect(rockyMntPoly)
+if (file.exists(new_rocky_shp_file_path)) {
+  message("Shapefile already exists!")
+} else {
+  st_write(rockies, new_rocky_shp_file_path)
+}
 
-#plot(regional_map, col="lightgrey", main="US and Canada Map")
-plot(rocky_mnt_poly, col="darkgrey", max.plot = 1) # add this argument if printing on map , add=TRUE,
+# Check that the file can be retrieved 
+if (file.access("./RockyMountainsRegion/rocky_mountains.shp", mode = 4) == 0) {
+  message("The file CAN be opened.")
+} else {
+  message("There was an error saving the file.") 
+}

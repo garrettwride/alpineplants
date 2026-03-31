@@ -8,7 +8,7 @@ library(reshape2)
 
 Run_LMM <- function(biomod_data, response_variable, output_file_path) {
   # for SPECIALISTS VS GENERALISTS as a whole (different Niche Scores): 
-  # Random Effects = Species, Bootstrap
+  # Random Effects = Species
   # Fixed Effects = NicheBreadth, Algorithm, PAStrategy, PANumber
   lmer_output <- lmer(as.formula(paste0(response_variable, " ~ 
                     NicheBreadth + Algorithm + PAStrategy + PANumber+ LogOccurrences +
@@ -26,39 +26,48 @@ Run_LMM <- function(biomod_data, response_variable, output_file_path) {
   return(lmer_output)
 }
 
-Create_Correlation_Heat_Map <- function(lmer_results ) {
-  correlation_data <- vcov(lmer_results)
-  print(correlation_data)
-  correlation_matrix <- as.matrix(correlation_data)
-  cor_long <- melt(correlation_matrix)
-  names(cor_long) <- c("Coef1", "Coef2", "Correlation") 
+Create_Correlation_Heat_Map <- function(lmer_results, fixed_var) {
+  summary(lmer_results)
+  correlation_matrix <- cov2cor(vcov(lmer_results))
+  correlation_matrix <- as.matrix(correlation_matrix)
+  correlation_long <- reshape2::melt(correlation_matrix)
+  names(correlation_long) <- c("Coef1", "Coef2", "Correlation")
+  correlation_long <- correlation_long[!grepl("^NicheBreadth:", correlation_long$Coef1), ]
+  correlation_long <- correlation_long[!grepl("^NicheBreadth:", correlation_long$Coef2), ]
+  correlation_long <- correlation_long[!(correlation_long$Coef1 == "(Intercept)"),]
+  correlation_long <- correlation_long[!(correlation_long$Coef2 == "(Intercept)"),]
   
-  print(cor_long)
-  
-  stuff <- ggplot(cor_long, aes(x = Coef1, y = Coef2, fill = Correlation)) +
-    geom_tile(color = "white") +
-    scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0,
-                         limits = c(-1, 1), name = "Correlation") +
+  lmerHeatMap <- ggplot(correlation_long, aes(x = Coef1, y = Coef2, fill = Correlation)) +
+    geom_tile(color = "lightgrey", linewidth = 0.1) +
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red", 
+                         midpoint = 0,
+                         limits = c(-1, 1), 
+                         name = "Correlation") +
+    labs(title = paste("Fixed Variable Correlations with", fixed_var)) +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+    theme(plot.title = element_text(hjust = 0.5, size = 10),
+          legend.title = element_text(size = 8),
+          axis.text.x = element_text(angle = 35, hjust = 1, size = 7),
+          axis.text.y = element_text(size = 7),
           axis.title = element_blank()) +
     coord_fixed()
-  return(stuff)
+  
+    #print(lmerHeatMap)
+  return(lmerHeatMap)
 }
-
 
 Create_Variance_Graph_WITHOUT_Interactions <- function(r2_object, title) {
   df <- data.frame(r2_object)
-  df <- df[!(df$Effect == "Model" | df$Effect == "NicheBreadth:Algorithm" | df$Effect == "NicheBreadth:PAStrategy" | df$Effect == "NicheBreadth:LogOccurrences" | df$Effect == "NicheBreadth:PANumber"),]
-  
+  df <- df[!(df$Effect == "Model"),] 
+  df <- df[!grepl("^NicheBreadth:", df$Effect), ] 
+           
   plot <- ggplot(data = df, aes(x = Effect, y = Rsq)) +
     geom_point(size = 2) +
     geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL)) +
     coord_cartesian(ylim = c(0, 0.34)) +
-    ggtitle(title) +
-    ylab("Variance Explained") +
-    xlab("Predictor") +
-    theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 20, hjust = 0.8))
+    labs(x = "Predictor", y = "Variance Explained", title = title) +
+    theme(plot.title = element_text(hjust = 0.5), 
+          axis.text.x = element_text(angle = 20, hjust = 0.8))
   
   return(plot)
 }
@@ -71,10 +80,9 @@ Create_Variance_Graph_JUST_Interactions <- function(r2_object, title) {
     geom_point(size = 2) +
     geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL)) +
     coord_cartesian(ylim = c(0, 0.34)) +
-    ggtitle(title) +
-    ylab("Variance Explained") +
-    xlab("Predictor") +
-    theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_text(angle = 35, hjust = 1))
+    labs(x = "Predictor", y = "Variance Explained", title = title) +
+    theme(plot.title = element_text(hjust = 0.5), 
+          axis.text.x = element_text(angle = 35, hjust = 1))
   
   return(plot)
 }
@@ -117,15 +125,15 @@ Plot_EMTrends_Results <- function(emtrends_results, fixed_var) {
     geom_errorbar(aes(xmin = asymp.LCL, xmax = asymp.UCL), width = 0.2) +
     geom_vline(xintercept = 0, linetype = "dashed") +
     facet_wrap(~ ResponseVariable, scales = "free_x") +
-    labs(
-      x = "NicheBreadth Effect (Slope)",
-      y = fixed_var,
-      title = paste0("Effect of NicheBreadth on Response Variables by ", fixed_var)
-    )
+    labs(x = "NicheBreadth Effect (Slope)", y = fixed_var,
+      title = paste0("Effect of NicheBreadth on Response Variables by ", fixed_var))
+    
   plotEMT
 }
 
 
+# csv of Biomod output 
+# Change the file path to where the file is saved on your computer
 biomod_data <- read.csv("./testFiles/SDM_results_for_LMM_3.csv")
 
 # makes PAStrategy and PANumber categorical variables 
@@ -135,25 +143,28 @@ biomod_data$Algorithm <- as.factor(biomod_data$Algorithm)
 biomod_data$Species <- as.factor(biomod_data$Species)
 biomod_data$Bootstrap <- as.factor(biomod_data$Bootstrap)
 
-
 #run LMM 
 schoener_resp_var_lmer <- Run_LMM(biomod_data, "SchoenersD", "LMMResults/SchoenersD_lmm_results.txt")
 meansuit_resp_var_lmer <- Run_LMM(biomod_data, "MeanSuitability", "LMMResults/MeanSuitability_lmm_results.txt")
 suitarea_resp_var_lmer <- Run_LMM(biomod_data, "SuitableArea", "LMMResults/SuitableArea_lmm_results.txt")
 elevcentroid_resp_var_lmer <- Run_LMM(biomod_data, "ElevationCentroid", "LMMResults/ElevationCentroid_lmm_results.txt")
 tss_resp_var_lmer <- Run_LMM(biomod_data, "TSS", "LMMResults/TSS_lmm_results.txt")
-
+# vcov(schoener_resp_var_lmer)
+# vcov(meansuit_resp_var_lmer)
 
 # Correlation Matrices 
-schoener_correlation_heat_map <- Create_Correlation_Heat_Map(schoener_resp_var_lmer)
-summary(schoener_correlation_heat_map, correlation_data = TRUE)
-schoener_correlation_heat_map
+schoener_correlation_heat_map <- Create_Correlation_Heat_Map(schoener_resp_var_lmer, "Schoener's D")
+meansuit_correlation_heat_map <- Create_Correlation_Heat_Map(meansuit_resp_var_lmer, "Mean Suitablity")
+suitarea_correlation_heat_map <- Create_Correlation_Heat_Map(suitarea_resp_var_lmer, "Suitable Area")
+elevcentroid_resp_correlation_heat_map <- Create_Correlation_Heat_Map(elevcentroid_resp_var_lmer, "Elevation Centroid")
+tss_correlation_heat_map <- Create_Correlation_Heat_Map(tss_resp_var_lmer, "Model Performance (TSS)")
 
-
-
-
-
-
+grid.arrange(schoener_correlation_heat_map, 
+             meansuit_correlation_heat_map, 
+             suitarea_correlation_heat_map, 
+             elevcentroid_resp_correlation_heat_map, 
+             tss_correlation_heat_map,
+             ncol = 3, nrow = 2)
 
 # MARGINAL calculation of PERCENT VARIANCE (only fixed variables)
 schoener_var_r2 = r2beta(schoener_resp_var_lmer, partial = TRUE, method = "nsj" )
@@ -194,7 +205,7 @@ grid.arrange(schoener_plot_with_interactions,
 ## LOOK AT THIS AND FIX
 
 # CONDITIONAL calculation of PERCENT VARIANCE (fixed AND random variables) <- this is no longer correct(change)
-
+# Estimated marginal means of linear trends 
 algorithm_emtrends_results <- Compute_EMTrends("Algorithm", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, tss_resp_var_lmer, "LMMResults/algorithm_emtrends_results.csv")
 paStrategy_emtrends_results <- Compute_EMTrends("PAStrategy", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, tss_resp_var_lmer, "LMMResults/paStrategy_emtrends_results.csv")
 paNumber_emtrends_results <- Compute_EMTrends("PANumber", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, tss_resp_var_lmer, "LMMResults/paNumber_emtrends_results.csv")
@@ -204,14 +215,3 @@ Plot_EMTrends_Results(algorithm_emtrends_results, "Algorithm")
 Plot_EMTrends_Results(paStrategy_emtrends_results, "PAStrategy")
 Plot_EMTrends_Results(paNumber_emtrends_results, "PANumber")
 
-
-# #original like last week
-# ggplot(paNumber_emtrends_results, aes(x = NicheBreadth.trend, y = PANumber, color = ResponseVariable)) +
-#   geom_point(size = 3) +
-#   geom_errorbar(aes(xmin = asymp.LCL, xmax = asymp.UCL), width = 0.2) +
-#   geom_vline(xintercept = 0, linetype = "dashed") +
-#   labs(
-#     x = "NicheBreadth Effect (Slope)",
-#     y = "PANumber",
-#     title = "Effect of NicheBreadth on Response Variables by Psuedo Absence Number")
-# 

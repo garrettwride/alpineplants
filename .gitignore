@@ -7,4 +7,8 @@ data/
 climate/
 .DS_Store
 climate_data/
+Artemisia.tridentata/
+Campanula.rotundifolia/
+Delphinium.occidentale/
+Pinus.longaeva/
 *.tif

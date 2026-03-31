@@ -15,7 +15,7 @@ biomod_data$Bootstrap <- as.factor(biomod_data$Bootstrap)
 
 # Plot NicheBreadth and Schoener's D based on Algorithm
 algorithm_plot <- ggplot(biomod_data, aes(x = NicheBreadth, y = SchoenersD, color = Algorithm)) +
-  geom_point(size = 1, alpha = 0.8) +
+  geom_point(size = 1, alpha = 0.1) +
   geom_smooth(size = 2, method = "lm", se = TRUE, linetype = "solid") +
   labs(
     x = "Niche Breadth",
@@ -35,7 +35,7 @@ algorithm_plot <- ggplot(biomod_data, aes(x = NicheBreadth, y = SchoenersD, colo
 
 # Plot NicheBreadth and Schoener's D based on PAStrategy
 paStrategy_plot <- ggplot(biomod_data, aes(x = NicheBreadth, y = SchoenersD, color = PAStrategy)) +
-  geom_point(size = 1, alpha = 0.8) +   
+  geom_point(size = 1, alpha = 0.1) +   
   geom_smooth(size = 2, method = "lm", se = TRUE, linetype = "solid") +
   labs(
     x = "Niche Breadth",
@@ -55,7 +55,7 @@ paStrategy_plot <- ggplot(biomod_data, aes(x = NicheBreadth, y = SchoenersD, col
 
 # Plot NicheBreadth and Schoener's D based on PANumber
 paNumber_plot <- ggplot(biomod_data, aes(x = NicheBreadth, y = SchoenersD, color = PANumber)) +
-  geom_point(size = 1, alpha = 0.8) +
+  geom_point(size = 1, alpha = 0.1) +
   geom_smooth(size = 2, method = "lm", se = TRUE, linetype = "solid") +
   labs(
     x = "Niche Breadth",

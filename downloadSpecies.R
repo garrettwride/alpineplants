@@ -178,4 +178,6 @@ DataSpecies <- long_data %>%
 
 #head(DataSpecies)
 
+#browseVignettes("partR2")
+
 

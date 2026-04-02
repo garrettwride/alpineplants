@@ -9,7 +9,7 @@ Make_Graph <- function(y_var, color_var, color_palette) {
     labs(
       x = "Niche Breadth",
       y = y_var,
-      title = paste0(y_var, " vs Niche Breadth by ",color_var),
+      title = paste0(y_var, " vs NicheBreadth by ",color_var),
       color = color_var
     ) +
     scale_color_manual(values = color_palette) +

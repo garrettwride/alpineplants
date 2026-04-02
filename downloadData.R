@@ -37,7 +37,15 @@ species_info <- tibble(
     "Artemisia tridentata",
     "Amelanchier utahensis",
     "Pinus edulis",
-    "Pinus longaeva"
+    "Pinus longaeva",
+    "Deschampsia cespitosa",
+    "Juncus balticus",
+    "Mentha arvensis",
+    "Antennaria lanata",
+    "Purshia tridentata",
+    "Ephedra viridis",
+    "Pinus ponderosa",
+    "Picea engelmannii"
   ),
   taxon_key = c(
     5384754,
@@ -59,7 +67,15 @@ species_info <- tibble(
     9396703,
     3023964,
     5285796,
-    5285258
+    5285258,
+    8059811,
+    2702048,
+    2927192,
+    5385629,
+    5370313,
+    2653272,
+    5285053,
+    5284917
   )
 )
 

@@ -122,7 +122,7 @@ elevation_centroid <- function(suitability, elevation) {
 algorithms   <- c("GLM", "GAM", "RF", "MAXENT")
 pa_strategies <- c("random", "disk")
 pa_numbers    <- c(1, 3, 5)   # × presences
-n_boot        <- 10
+n_boot        <- 8
 
 results <- data.frame(
   Species = character(),
@@ -137,6 +137,7 @@ results <- data.frame(
   SuitableArea = numeric(),
   SchoenersD = numeric(),
   ElevationCentroid = numeric(),
+  TSS = numeric(),
   stringsAsFactors = FALSE
 )
 
@@ -270,6 +271,22 @@ for (i in seq_len(nrow(species_df))) {
           # Elevation centroid
           elev_cent <- elevation_centroid(algo_raster, elev_rocky)
           
+          # Model Performance (TSS)
+          evals_df <- as.data.frame(get_evaluations(myBiomodModelOut))
+          
+          tss_row <- evals_df[
+            evals_df$algo == algo &
+              evals_df$PA == "allData" &
+              evals_df$run == "allRun" &
+              evals_df$metric.eval == "TSS",
+          ]
+          
+          if(nrow(tss_row) == 0){
+            tss_val <- NA
+          } else {
+            tss_val <- tss_row$cutoff
+          }
+          
           # Save results
           results <- rbind(
             results,
@@ -285,7 +302,8 @@ for (i in seq_len(nrow(species_df))) {
               MeanSuitability = mean_suit,
               SuitableArea = suitable_area,
               SchoenersD = D_val,
-              ElevationCentroid = elev_cent
+              ElevationCentroid = elev_cent,
+              TSS = tss_val
             )
           )
         }
@@ -293,5 +311,5 @@ for (i in seq_len(nrow(species_df))) {
     }
   }
 }
-
+print(results)
 write.csv(results, "./data/SDM_results_for_LMM.csv", row.names = FALSE)

@@ -5,20 +5,22 @@ library(ggplot2)
 library(dplyr)
 library(gridExtra)
 library(reshape2)
+library(partR2)
 
 Run_LMM <- function(biomod_data, response_variable, output_file_path) {
   # for SPECIALISTS VS GENERALISTS as a whole (different Niche Scores): 
   # Random Effects = Species
   # Fixed Effects = NicheBreadth, Algorithm, PAStrategy, PANumber
   lmer_output <- lmer(as.formula(paste0(response_variable, " ~ 
-                    NicheBreadth + Algorithm + PAStrategy + PANumber+ LogOccurrences +
+                    NicheBreadth + Algorithm + PAStrategy + PANumber +
                     NicheBreadth:Algorithm + 
                     NicheBreadth:PAStrategy + 
                     NicheBreadth:PANumber + 
-                    NicheBreadth:LogOccurrences +
                     (1 | Species)")),
                       data = biomod_data,
                       REML = FALSE )
+  
+  # short hand for "NicheBreadth + Algorithm + NicheBreadth:Algorithm" = "NicheBreadth*Algorithm"
   
   # save results as txt file
   summary <- summary(lmer_output, correlation = TRUE)
@@ -56,6 +58,18 @@ Create_Correlation_Heat_Map <- function(lmer_results, fixed_var) {
   return(lmerHeatMap)
 }
 
+Run_PartR2 <- function(lmer_results) {
+  part_outcome <- partR2(
+    lmer_results,
+    partvars = c("NicheBreadth", "Algorithm", "PAStrategy", "PANumber"),
+    R2_type = "conditional",                    # conditional or marginal??
+    data = biomod_data,
+    nboot = 50
+  )
+  
+  return(part_outcome)
+}
+
 Create_Variance_Graph_WITHOUT_Interactions <- function(r2_object, title) {
   df <- data.frame(r2_object)
   df <- df[!(df$Effect == "Model"),] 
@@ -87,7 +101,7 @@ Create_Variance_Graph_JUST_Interactions <- function(r2_object, title) {
   return(plot)
 }
 
-Compute_EMTrends <- function(fixed_var, schoener_lmer, meansuit_lmer, suitarea_lmer,elevcentroid_lmer, tss_lmer, output_file_path) {
+Compute_EMTrends <- function(fixed_var, schoener_lmer, meansuit_lmer, suitarea_lmer, elevcentroid_lmer, tss_lmer, output_file_path) {
   emt_schoener = emtrends(schoener_lmer, as.formula(paste0("~", fixed_var)), var = "NicheBreadth")
   emt_meansuit = emtrends(meansuit_lmer, as.formula(paste0("~", fixed_var)), var = "NicheBreadth")
   emt_suitarea = emtrends(suitarea_lmer, as.formula(paste0("~", fixed_var)), var = "NicheBreadth")
@@ -121,20 +135,21 @@ Compute_EMTrends <- function(fixed_var, schoener_lmer, meansuit_lmer, suitarea_l
 
 Plot_EMTrends_Results <- function(emtrends_results, fixed_var) {
     plotEMT <- ggplot(emtrends_results, aes(x = NicheBreadth.trend, y = .data[[fixed_var]])) +
-    geom_point(size = 3) +
-    geom_errorbar(aes(xmin = asymp.LCL, xmax = asymp.UCL), width = 0.2) +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    facet_wrap(~ ResponseVariable, scales = "free_x") +
-    labs(x = "NicheBreadth Effect (Slope)", y = fixed_var,
-      title = paste0("Effect of NicheBreadth on Response Variables by ", fixed_var))
+      geom_point(size = 3) +
+      geom_errorbar(aes(xmin = asymp.LCL, xmax = asymp.UCL), width = 0.2) +
+      geom_vline(xintercept = 0, linetype = "dashed") +
+      facet_wrap(~ ResponseVariable, scales = "free_x") +
+      labs(x = "NicheBreadth Effect (Slope)", y = fixed_var,
+          title = paste0("Effect of NicheBreadth on Response Variables by ", fixed_var))
     
   plotEMT
-}
+} 
 
 
 # csv of Biomod output 
 # Change the file path to where the file is saved on your computer
-biomod_data <- read.csv("./testFiles/SDM_results_for_LMM_3.csv")
+biomod_results_file_path <- "./testFiles/SDM_results_for_LMM_3.csv"
+biomod_data <- read.csv(biomod_results_file_path)
 
 # makes PAStrategy and PANumber categorical variables 
 biomod_data$PAStrategy <- as.factor(biomod_data$PAStrategy)
@@ -166,12 +181,13 @@ grid.arrange(schoener_correlation_heat_map,
              tss_correlation_heat_map,
              ncol = 3, nrow = 2)
 
-# MARGINAL calculation of PERCENT VARIANCE (only fixed variables)
-schoener_var_r2 = r2beta(schoener_resp_var_lmer, partial = TRUE, method = "nsj" )
-meansuit_var_r2 = r2beta(meansuit_resp_var_lmer, partial = TRUE, method = "nsj" )
-suitarea_var_r2 = r2beta(suitarea_resp_var_lmer, partial = TRUE, method = "nsj" )
-elevcentroid_var_r2 = r2beta(elevcentroid_resp_var_lmer, partial = TRUE, method = "nsj" )
-tss_var_r2 = r2beta(tss_resp_var_lmer, partial = TRUE, method = "nsj" )
+
+# calculation of PERCENT VARIANCE 
+schoener_var_r2 <- r2beta(schoener_resp_var_lmer, partial = TRUE, method = "nsj")
+meansuit_var_r2 <- r2beta(meansuit_resp_var_lmer, partial = TRUE, method = "nsj")
+suitarea_var_r2 <- r2beta(suitarea_resp_var_lmer, partial = TRUE, method = "nsj")
+elevcentroid_var_r2 <- r2beta(elevcentroid_resp_var_lmer, partial = TRUE, method = "nsj")
+tss_var_r2 = r2beta(tss_resp_var_lmer, partial = TRUE, method = "nsj")
 
 # plotting variances WITHOUT interactions
 schoener_plot_without_interactions <- Create_Variance_Graph_WITHOUT_Interactions(schoener_var_r2, "Marginal R² for Schoener's D")
@@ -202,16 +218,52 @@ grid.arrange(schoener_plot_with_interactions,
              ncol = 3, nrow = 2)
 
 
+# marginal
+# partr2_schoener <- Run_PartR2(schoener_resp_var_lmer)
+# #partr2_meansuit <- Run_PartR2(meansuit_resp_var_lmer)
+# #partr2_suitarea <- Run_PartR2(suitarea_resp_var_lmer)
+# #partr2_elevcentroid <- Run_PartR2(elevcentroid_resp_var_lmer)
+# #partr2_tss <- Run_PartR2(tss_resp_var_lmer)
+# 
+# # We care about the "Inclusive R2 (SC^2 * R2):" section
+# summary(partr2_schoener)
+# sr2 <- partr2_schoener$IR2
+# sr2
+
+# 
+# ggplot(sr2, aes(x = reorder(Predictor, IR2), y = IR2)) +
+#   geom_col(fill = "darkgreen") +
+#   geom_errorbar(aes(ymin = CI_lower, ymax = CI_upper), width = 0.2) +
+#   coord_flip() +
+#   labs(
+#     x = "Predictor",
+#     y = "Inclusive R²",
+#     title = "Total contribution of predictors (including shared variance)"
+#   ) +
+#   theme_minimal()
+# # partr2_schoener$boot_warnings
+# 
+# 
+# 
+
+
+
+
+
+
+
 ## LOOK AT THIS AND FIX
 
-# CONDITIONAL calculation of PERCENT VARIANCE (fixed AND random variables) <- this is no longer correct(change)
-# Estimated marginal means of linear trends 
+# Estimated Marginal Trends of linear trends 
 algorithm_emtrends_results <- Compute_EMTrends("Algorithm", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, tss_resp_var_lmer, "LMMResults/algorithm_emtrends_results.csv")
 paStrategy_emtrends_results <- Compute_EMTrends("PAStrategy", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, tss_resp_var_lmer, "LMMResults/paStrategy_emtrends_results.csv")
 paNumber_emtrends_results <- Compute_EMTrends("PANumber", schoener_resp_var_lmer, meansuit_resp_var_lmer, suitarea_resp_var_lmer, elevcentroid_resp_var_lmer, tss_resp_var_lmer, "LMMResults/paNumber_emtrends_results.csv")
 
-# Plot Results
-Plot_EMTrends_Results(algorithm_emtrends_results, "Algorithm")
-Plot_EMTrends_Results(paStrategy_emtrends_results, "PAStrategy")
-Plot_EMTrends_Results(paNumber_emtrends_results, "PANumber")
+
+# Plot Results 
+Plot_EMTrends_Results(algorithm_emtrends_results, "Algorithm") 
+Plot_EMTrends_Results(paStrategy_emtrends_results, "PAStrategy") 
+Plot_EMTrends_Results(paNumber_emtrends_results, "PANumber") 
+
+
 

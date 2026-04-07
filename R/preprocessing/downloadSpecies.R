@@ -4,9 +4,7 @@ library(dplyr)
 library(sf)
 library(tidyr)
 
-#occ_download > occ_download_wait(key) > occ_download_get(zip_file) > occ_download_import(zip_file)
-
-rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_read("data/raw/RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
 rocky_wkt <- st_as_text(st_union(rocky_poly))
 
@@ -64,7 +62,6 @@ clean_and_get_occurrences <- function(taxon_key, species_name, rocky_poly, rocky
   
 } 
 
-
 #graminoids:
 showy_sedge <- clean_and_get_occurrences(2723145, "Carex spectabilis", rocky_poly, rocky_wkt)
 rm_sedge <- clean_and_get_occurrences(2722910, "Carex arapahoensis", rocky_poly, rocky_wkt)
@@ -118,7 +115,6 @@ juniper <- clean_and_get_occurrences(2684709, "Juniperus communis", rocky_poly, 
 #for BIOMOD input:
 species_list <- list(
   moss_campion,
-  #shootingstar,
   maple,
   fir,
   hackberry,
@@ -179,7 +175,3 @@ DataSpecies <- long_data %>%
     values_from = Presence,
     values_fill = 0
   )
-
-head(DataSpecies)
-
-

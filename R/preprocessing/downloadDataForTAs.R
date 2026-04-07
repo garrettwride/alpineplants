@@ -18,7 +18,6 @@ rocky_wkt  <- st_as_text(st_union(rocky_poly))
 ## Species list
 species_info <- tibble(
   Species = c(
-    "Silene acaulis",
     "Delphinium occidentale",
     "Campanula rotundifolia"
   ),
@@ -96,7 +95,7 @@ saveRDS(myExpl, "data/myExpl.rds")
 
 message("Downloading elevation data...")
 
-elev <- worldclim_global(var = "elev", res = 2.5, path = "climate/")
+elev <- worldclim_global(var = "elev", res = 10, path = "climate/")
 
 elev_rocky <- crop(elev, rocky_vect)
 elev_rocky <- mask(elev_rocky, rocky_vect)
@@ -105,3 +104,4 @@ saveRDS(elev_rocky, "data/elev_rocky.rds")
 
 message("Climate and elevation saved.")
 message("Download script complete.")
+

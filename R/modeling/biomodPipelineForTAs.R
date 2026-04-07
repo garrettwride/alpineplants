@@ -119,10 +119,10 @@ elevation_centroid <- function(suitability, elevation) {
 }
 
 
-algorithms   <- c("GLM", "GAM", "RF", "MAXENT")
-pa_strategies <- c("random", "disk")
-pa_numbers    <- c(1, 3, 5)   # × presences
-n_boot        <- 8
+algorithms   <- c("GLM", "RF")
+pa_strategies <- c("disk")
+pa_numbers    <- c(1, 3)   # × presences
+n_boot        <- 1
 
 results <- data.frame(
   Species = character(),
@@ -312,4 +312,4 @@ for (i in seq_len(nrow(species_df))) {
   }
 }
 print(results)
-write.csv(results, "./data/SDM_results_for_LMM.csv", row.names = FALSE)
+write.csv(results, "./data/SDM_results_for_TAs.csv", row.names = FALSE)

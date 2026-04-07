@@ -1,42 +1,65 @@
 Linear mixed model fit by maximum likelihood  ['lmerMod']
 Formula: ElevationCentroid ~ NicheBreadth + Algorithm + PAStrategy + PANumber +  
-    LogOccurrences + NicheBreadth:Algorithm + NicheBreadth:PAStrategy +  
-    NicheBreadth:PANumber + NicheBreadth:LogOccurrences + (1 |  
-    Species) + (1 | Species:Bootstrap)
+    NicheBreadth:Algorithm + NicheBreadth:PAStrategy + NicheBreadth:PANumber +  
+    (1 | Species)
    Data: biomod_data
 
       AIC       BIC    logLik -2*log(L)  df.resid 
-  67101.5   67226.7  -33531.7   67063.5      5357 
+  67098.2   67203.7  -33533.1   67066.2      5360 
 
 Scaled residuals: 
     Min      1Q  Median      3Q     Max 
--6.2211 -0.4955  0.0227  0.4834  5.5471 
+-6.2188 -0.4960  0.0230  0.4831  5.5494 
 
 Random effects:
- Groups            Name        Variance Std.Dev.
- Species:Bootstrap (Intercept)     0      0.0   
- Species           (Intercept) 35077    187.3   
- Residual                      14837    121.8   
-Number of obs: 5376, groups:  Species:Bootstrap, 224; Species, 28
+ Groups   Name        Variance Std.Dev.
+ Species  (Intercept) 38695    196.7   
+ Residual             14837    121.8   
+Number of obs: 5376, groups:  Species, 28
 
 Fixed effects:
                               Estimate Std. Error t value
-(Intercept)                   2078.136    313.521   6.628
-NicheBreadth                  -120.104     88.771  -1.353
+(Intercept)                   2066.890     37.434  55.215
+NicheBreadth                     7.821     15.282   0.512
 AlgorithmGLM                   -30.929      4.699  -6.582
 AlgorithmMAXENT                -19.248      4.699  -4.096
 AlgorithmRF                    -54.028      4.699 -11.498
 PAStrategyrandom                89.423      3.323  26.914
 PANumber3                       37.297      4.069   9.166
 PANumber5                       53.510      4.069  13.150
-LogOccurrences                 -16.170     95.943  -0.169
 NicheBreadth:AlgorithmGLM       -5.738      1.918  -2.991
 NicheBreadth:AlgorithmMAXENT    19.057      1.918   9.934
 NicheBreadth:AlgorithmRF        16.973      1.918   8.848
 NicheBreadth:PAStrategyrandom  -54.455      1.356 -40.147
 NicheBreadth:PANumber3          -4.203      1.661  -2.530
 NicheBreadth:PANumber5          -7.032      1.661  -4.233
-NicheBreadth:LogOccurrences     45.378     28.779   1.577
-optimizer (nloptwrap) convergence code: 0 (OK)
-boundary (singular) fit: see help('isSingular')
 
+Correlation of Fixed Effects:
+            (Intr) NchBrd AlgGLM AMAXEN AlgrRF PAStrt PANmb3 PANmb5 NB:AGL NB:AMA NB:ARF NB:PAS
+NicheBredth  0.000                                                                             
+AlgorthmGLM -0.063  0.000                                                                      
+AlgrtMAXENT -0.063  0.000  0.500                                                               
+AlgorithmRF -0.063  0.000  0.500  0.500                                                        
+PAStrtgyrnd -0.044  0.000  0.000  0.000  0.000                                                 
+PANumber3   -0.054  0.000  0.000  0.000  0.000  0.000                                          
+PANumber5   -0.054  0.000  0.000  0.000  0.000  0.000  0.500                                   
+NchBrd:AGLM  0.000 -0.063  0.000  0.000  0.000  0.000  0.000  0.000                            
+NcB:AMAXENT  0.000 -0.063  0.000  0.000  0.000  0.000  0.000  0.000  0.500                     
+NchBrdt:ARF  0.000 -0.063  0.000  0.000  0.000  0.000  0.000  0.000  0.500  0.500              
+NchBrdt:PAS  0.000 -0.044  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000       
+NchBrd:PAN3  0.000 -0.054  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+NchBrd:PAN5  0.000 -0.054  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+            NB:PAN3
+NicheBredth        
+AlgorthmGLM        
+AlgrtMAXENT        
+AlgorithmRF        
+PAStrtgyrnd        
+PANumber3          
+PANumber5          
+NchBrd:AGLM        
+NcB:AMAXENT        
+NchBrdt:ARF        
+NchBrdt:PAS        
+NchBrd:PAN3        
+NchBrd:PAN5  0.500 

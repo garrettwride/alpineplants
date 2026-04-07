@@ -1,0 +1,64 @@
+Linear mixed model fit by maximum likelihood  ['lmerMod']
+Formula: TSS ~ NicheBreadth + Algorithm + PAStrategy + PANumber + NicheBreadth:Algorithm +  
+    NicheBreadth:PAStrategy + NicheBreadth:PANumber + (1 | Species)
+   Data: biomod_data
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+  67183.2   67288.6  -33575.6   67151.2      5360 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.0061 -0.6746 -0.0500  0.5654  5.2276 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ Species  (Intercept)  1638     40.48  
+ Residual             15322    123.78  
+Number of obs: 5376, groups:  Species, 28
+
+Fixed effects:
+                               Estimate Std. Error t value
+(Intercept)                    444.5653     8.8580  50.188
+NicheBreadth                   -12.5129     3.6162  -3.460
+AlgorithmGLM                     7.0327     4.7750   1.473
+AlgorithmMAXENT                -87.1350     4.7750 -18.248
+AlgorithmRF                    134.8426     4.7750  28.239
+PAStrategyrandom               -17.6090     3.3765  -5.215
+PANumber3                     -117.6666     4.1353 -28.454
+PANumber5                     -164.1091     4.1353 -39.685
+NicheBreadth:AlgorithmGLM        0.1067     1.9494   0.055
+NicheBreadth:AlgorithmMAXENT    -8.6791     1.9494  -4.452
+NicheBreadth:AlgorithmRF         9.5432     1.9494   4.896
+NicheBreadth:PAStrategyrandom    5.2760     1.3784   3.828
+NicheBreadth:PANumber3          -1.2076     1.6882  -0.715
+NicheBreadth:PANumber5           2.0837     1.6882   1.234
+
+Correlation of Fixed Effects:
+            (Intr) NchBrd AlgGLM AMAXEN AlgrRF PAStrt PANmb3 PANmb5 NB:AGL NB:AMA NB:ARF NB:PAS
+NicheBredth  0.000                                                                             
+AlgorthmGLM -0.270  0.000                                                                      
+AlgrtMAXENT -0.270  0.000  0.500                                                               
+AlgorithmRF -0.270  0.000  0.500  0.500                                                        
+PAStrtgyrnd -0.191  0.000  0.000  0.000  0.000                                                 
+PANumber3   -0.233  0.000  0.000  0.000  0.000  0.000                                          
+PANumber5   -0.233  0.000  0.000  0.000  0.000  0.000  0.500                                   
+NchBrd:AGLM  0.000 -0.270  0.000  0.000  0.000  0.000  0.000  0.000                            
+NcB:AMAXENT  0.000 -0.270  0.000  0.000  0.000  0.000  0.000  0.000  0.500                     
+NchBrdt:ARF  0.000 -0.270  0.000  0.000  0.000  0.000  0.000  0.000  0.500  0.500              
+NchBrdt:PAS  0.000 -0.191  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000       
+NchBrd:PAN3  0.000 -0.233  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+NchBrd:PAN5  0.000 -0.233  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000  0.000
+            NB:PAN3
+NicheBredth        
+AlgorthmGLM        
+AlgrtMAXENT        
+AlgorithmRF        
+PAStrtgyrnd        
+PANumber3          
+PANumber5          
+NchBrd:AGLM        
+NcB:AMAXENT        
+NchBrdt:ARF        
+NchBrdt:PAS        
+NchBrd:PAN3        
+NchBrd:PAN5  0.500 

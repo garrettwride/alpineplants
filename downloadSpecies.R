@@ -3,6 +3,7 @@ library(rgbif)
 library(dplyr)
 library(sf)
 library(tidyr)
+library(purrr)
 
 rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
@@ -175,9 +176,3 @@ DataSpecies <- long_data %>%
     values_from = Presence,
     values_fill = 0
   )
-
-#head(DataSpecies)
-
-#browseVignettes("partR2")
-
-

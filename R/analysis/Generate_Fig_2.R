@@ -248,7 +248,7 @@ herb_delphinium_data <- clean_and_get_occurrences(3033713, "Delphinium occidenta
 brown_spectrum <- colorRampPalette(c("bisque", "burlywood1", "sienna3", "saddlebrown", "grey10"))(100)
 
 
-png("Generalist_Map_Big.png", width = 10, height = 15, units = "in", res = 300)
+png("./output/Fig2/Generalist_Map.png", width = 10, height = 15, units = "in", res = 300)
 
 par(mar = c(10, 8, 12, 8), bg = "white")
 
@@ -275,7 +275,7 @@ legend("bottomleft",
 
 dev.off()
 
-png("Specialist_Map_Big.png", width = 10, height = 15, units = "in", res = 300)
+png("./output/Fig2/Specialist_Map.png", width = 10, height = 15, units = "in", res = 300)
 
 par(mar = c(10, 8, 12, 8), bg = "white")
 

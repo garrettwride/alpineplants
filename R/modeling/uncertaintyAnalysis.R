@@ -4,7 +4,7 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 
-biomod_data <- read.csv("./testFiles/SDM_results_for_LMM.csv")
+biomod_data <- read.csv("./data/SDM_results_for_LMM.csv")
 
 # Ensure factors
 biomod_data <- biomod_data %>%

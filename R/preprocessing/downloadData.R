@@ -7,11 +7,9 @@ library(tidyr)
 library(terra)
 library(geodata)
 
-dir.create("data", showWarnings = FALSE)
-dir.create("climate", showWarnings = FALSE)
 
 ## Rocky Mountain polygon
-rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_read("./data/RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)
 rocky_wkt  <- st_as_text(st_union(rocky_poly))
 
@@ -127,13 +125,13 @@ species_occurrences <- species_info %>%
     Occurrences = map2(taxon_key, Species, clean_and_get_occurrences)
   )
 
-saveRDS(species_occurrences, "data/species_occurrences.rds")
+saveRDS(species_occurrences, "./data/species_occurrences.rds")
 
 message("Species download complete.")
 
 message("Downloading WorldClim climate data...")
 
-bio <- worldclim_global(var = "bio", res = 2.5, path = "climate/")
+bio <- worldclim_global(var = "bio", res = 2.5, path = "./data/")
 
 rocky_vect <- vect(rocky_poly)
 
@@ -143,16 +141,16 @@ bio_rocky <- mask(bio_rocky, rocky_vect)
 # Select subset of bioclim variables
 myExpl <- bio_rocky[[c(1, 3, 4, 12, 15)]]
 
-saveRDS(myExpl, "data/myExpl.rds")
+saveRDS(myExpl, "./data/myExpl.rds")
 
 message("Downloading elevation data...")
 
-elev <- worldclim_global(var = "elev", res = 2.5, path = "climate/")
+elev <- worldclim_global(var = "elev", res = 2.5, path = "./data/")
 
 elev_rocky <- crop(elev, rocky_vect)
 elev_rocky <- mask(elev_rocky, rocky_vect)
 
-saveRDS(elev_rocky, "data/elev_rocky.rds")
+saveRDS(elev_rocky, "./data/elev_rocky.rds")
 
 message("Climate and elevation saved.")
 message("Download script complete.")

@@ -5,10 +5,10 @@ library(sf)
 # How I got the region in the first place (download label areas from here: https://www.naturalearthdata.com/downloads/50m-physical-vectors/50m-physical-labels/)
 
 # Replace the file path with where the downloaded file is on your personal device
-labels_download_file_path = "~/Library/CloudStorage/OneDrive-BrighamYoungUniversity/rstudio/ne_50m_geography_regions_polys"
+labels_download_file_path = "./data/ne_50m_geography_regions_polys"
 
 # Replace the file path with the location of the folder you created on your personal device
-final_shape_folder_path = "/Users/kristinbillings/Library/CloudStorage/OneDrive-BrighamYoungUniversity/rstudio/alpineplants/RockyMountainsRegion"
+final_shape_folder_path = "./data/RockyMountainsRegion"
 
 
 labels50 <- st_read(labels_download_file_path)

@@ -6,7 +6,7 @@ library(sf)
 library(dplyr)
 library(elevatr)
 
-rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_read("./data/RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)
 rocky_vect <- vect(rocky_poly)
 

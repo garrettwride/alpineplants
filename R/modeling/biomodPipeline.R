@@ -5,7 +5,7 @@ library(tidyr)
 library(purrr)
 
 ## Get Rocky Mountain Polygon
-rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_read("./data/RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
 rocky_wkt <- st_as_text(st_union(rocky_poly))
 species_df <- readRDS("./data/species_occurrences.rds")

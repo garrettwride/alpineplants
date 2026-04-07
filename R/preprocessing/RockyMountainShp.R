@@ -30,7 +30,7 @@ if (file.exists(new_rocky_shp_file_path)) {
 }
 
 # Check that the file can be retrieved 
-if (file.access("./RockyMountainsRegion/rocky_mountains.shp", mode = 4) == 0) {
+if (file.access("./data/RockyMountainsRegion/rocky_mountains.shp", mode = 4) == 0) {
   message("The file CAN be opened.")
 } else {
   message("There was an error saving the file.") 

@@ -6,7 +6,7 @@ library(sf)
 library(CoordinateCleaner)
 library(geodata)
 ## Get Rocky mountain polygon
-rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_read("./data/RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
 rocky_wkt <- st_as_text(st_union(rocky_poly))
 

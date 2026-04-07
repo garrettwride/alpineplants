@@ -4,7 +4,7 @@ library(dplyr)
 library(sf)
 library(tidyr)
 
-rocky_poly <- st_read("data/raw/RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_read("w./data/RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
 rocky_wkt <- st_as_text(st_union(rocky_poly))
 

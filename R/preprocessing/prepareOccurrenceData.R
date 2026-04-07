@@ -17,7 +17,7 @@ occ_sf <- st_as_sf(
   crs = 4326
 )
 
-rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_read("./data/RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)  # Make sure CRS matches occurrences
 
 occ_rocky <- st_intersection(occ_sf, rocky_poly)

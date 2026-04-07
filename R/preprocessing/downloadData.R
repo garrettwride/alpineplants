@@ -11,7 +11,7 @@ dir.create("data", showWarnings = FALSE)
 dir.create("climate", showWarnings = FALSE)
 
 ## Rocky Mountain polygon
-rocky_poly <- st_read("./RockyMountainsRegion/rocky_mountains.shp")
+rocky_poly <- st_read("./data/RockyMountainsRegion/rocky_mountains.shp")
 rocky_poly <- st_transform(rocky_poly, 4326)
 rocky_wkt  <- st_as_text(st_union(rocky_poly))
 

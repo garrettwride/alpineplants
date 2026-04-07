@@ -53,43 +53,47 @@ grid.arrange(schoeners_algorithm_plot,
              schoeners_paNumber_plot,
              ncol = 3, nrow = 1)
 
-# Plot NicheBreadth and MeanSuitability
-meanSuit_algorithm_plot <- Make_Graph("MeanSuitability", "Algorithm", algorithm_palette)
-meanSuit_paStrategy_plot <- Make_Graph("MeanSuitability", "PAStrategy", paStrategy_palette)
-meanSuit_paNumber_plot <- Make_Graph("MeanSuitability", "PANumber", paNumber_palette)
 
-grid.arrange(meanSuit_algorithm_plot, 
-             meanSuit_paStrategy_plot, 
-             meanSuit_paNumber_plot,
-             ncol = 3, nrow = 1)
 
-# Plot NicheBreadth and SuitableArea
-suitArea_algorithm_plot <- Make_Graph("SuitableArea", "Algorithm", algorithm_palette)
-suitArea_paStrategy_plot <- Make_Graph("SuitableArea", "PAStrategy", paStrategy_palette)
-suitArea_paNumber_plot <- Make_Graph("SuitableArea", "PANumber", paNumber_palette)
+# Code to make 4 more graphs
 
-grid.arrange(suitArea_algorithm_plot, 
-             suitArea_paStrategy_plot, 
-             suitArea_paNumber_plot,
-             ncol = 3, nrow = 1)
-
-# Plot NicheBreadth and ElevationCentroid
-elevCentroid_algorithm_plot <- Make_Graph("ElevationCentroid", "Algorithm", algorithm_palette)
-elevCentroid_paStrategy_plot <- Make_Graph("ElevationCentroid", "PAStrategy", paStrategy_palette)
-elevCentroid_paNumber_plot <- Make_Graph("ElevationCentroid", "PANumber", paNumber_palette)
-
-grid.arrange(elevCentroid_algorithm_plot, 
-             elevCentroid_paStrategy_plot, 
-             elevCentroid_paNumber_plot,
-             ncol = 3, nrow = 1)
-
-# Plot NicheBreadth and TSS
-tss_algorithm_plot <- Make_Graph("TSS", "Algorithm", algorithm_palette)
-tss_paStrategy_plot <- Make_Graph("TSS", "PAStrategy", paStrategy_palette)
-tss_paNumber_plot <- Make_Graph("TSS", "PANumber", paNumber_palette)
-
-grid.arrange(tss_algorithm_plot, 
-             tss_paStrategy_plot, 
-             tss_paNumber_plot,
-             ncol = 3, nrow = 1)
+# # Plot NicheBreadth and MeanSuitability
+# meanSuit_algorithm_plot <- Make_Graph("MeanSuitability", "Algorithm", algorithm_palette)
+# meanSuit_paStrategy_plot <- Make_Graph("MeanSuitability", "PAStrategy", paStrategy_palette)
+# meanSuit_paNumber_plot <- Make_Graph("MeanSuitability", "PANumber", paNumber_palette)
+# 
+# grid.arrange(meanSuit_algorithm_plot, 
+#              meanSuit_paStrategy_plot, 
+#              meanSuit_paNumber_plot,
+#              ncol = 3, nrow = 1)
+# 
+# # Plot NicheBreadth and SuitableArea
+# suitArea_algorithm_plot <- Make_Graph("SuitableArea", "Algorithm", algorithm_palette)
+# suitArea_paStrategy_plot <- Make_Graph("SuitableArea", "PAStrategy", paStrategy_palette)
+# suitArea_paNumber_plot <- Make_Graph("SuitableArea", "PANumber", paNumber_palette)
+# 
+# grid.arrange(suitArea_algorithm_plot, 
+#              suitArea_paStrategy_plot, 
+#              suitArea_paNumber_plot,
+#              ncol = 3, nrow = 1)
+# 
+# # Plot NicheBreadth and ElevationCentroid
+# elevCentroid_algorithm_plot <- Make_Graph("ElevationCentroid", "Algorithm", algorithm_palette)
+# elevCentroid_paStrategy_plot <- Make_Graph("ElevationCentroid", "PAStrategy", paStrategy_palette)
+# elevCentroid_paNumber_plot <- Make_Graph("ElevationCentroid", "PANumber", paNumber_palette)
+# 
+# grid.arrange(elevCentroid_algorithm_plot, 
+#              elevCentroid_paStrategy_plot, 
+#              elevCentroid_paNumber_plot,
+#              ncol = 3, nrow = 1)
+# 
+# # Plot NicheBreadth and TSS
+# tss_algorithm_plot <- Make_Graph("TSS", "Algorithm", algorithm_palette)
+# tss_paStrategy_plot <- Make_Graph("TSS", "PAStrategy", paStrategy_palette)
+# tss_paNumber_plot <- Make_Graph("TSS", "PANumber", paNumber_palette)
+# 
+# grid.arrange(tss_algorithm_plot, 
+#              tss_paStrategy_plot, 
+#              tss_paNumber_plot,
+#              ncol = 3, nrow = 1)
 

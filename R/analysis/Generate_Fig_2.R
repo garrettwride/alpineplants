@@ -8,6 +8,9 @@ library(purrr)
 library(geodata)
 library(gridExtra)
 
+if (!dir.exists("./output/Fig2")) {
+  dir.create("./output/Fig2", recursive = TRUE)
+}
 
 ## Get Rocky Mountain Polygon
 rocky_poly <- st_read("./data/RockyMountainsRegion/rocky_mountains.shp")
@@ -31,48 +34,12 @@ elev_rocky <- mask(elev_rocky, rocky_poly)
 ## Get occurrence Data
 species_info <- tibble(
   Species = c(
-    "Silene acaulis",
     "Delphinium occidentale",
-    "Dryas octopetala",
-    "Acer glabrum",
-    "Abies lasiocarpa",
-    "Sorbus scopulina",
-    "Dasiphora fruticosa",
-    "Celtis reticulata",
-    "Salix petrophila",
-    "Carex spectabilis",
-    "Carex arapahoensis",
-    "Carex perglobosa",
-    "Juncus drummondii",
-    "Pseudoroegneria spicata",
-    "Bistorta vivipara",
-    "Campanula rotundifolia",
-    "Artemisia tridentata",
-    "Amelanchier utahensis",
-    "Pinus edulis",
-    "Pinus longaeva"
+    "Campanula rotundifolia"
   ),
   taxon_key = c(
-    5384754,
     3033713,
-    4889932,
-    3189864,
-    2685313,
-    3012298,
-    5370380,
-    6406316,
-    5372756,
-    2723145,
-    2722910,
-    2723300,
-    2701717,
-    2705699,
-    2889299,
-    5410907,
-    9396703,
-    3023964,
-    5285796,
-    5285258
+    5410907
   )
 )
 

@@ -190,7 +190,7 @@ niche_results <- niche_metrics %>%
 
 niche_results <- niche_results %>%
   mutate(
-    Niche_Final_z = as.numeric(scale(NicheBreadth_Corrected)),
+    Niche_Final_z = as.numeric(scale(NicheBreadth)),
     Specialization_Rank = -Niche_Final_z
   )
 

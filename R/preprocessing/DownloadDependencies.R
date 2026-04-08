@@ -2,7 +2,7 @@ pkgs <- c(
   "biomod2", "CoordinateCleaner", "dismo", "dplyr", "elevatr", 
   "emmeans", "geodata", "ggplot2", "gridExtra", "lme4", 
   "purrr", "r2glmm", "reshape2", "rgbif", "rJava", 
-  "R.utils", "sf", "terra", "tidyr"
+  "R.utils", "sf", "terra", "tidyr", "partR2"
 )
 
 if (!requireNamespace("biomod2", quietly = TRUE)) install.packages("biomod2")
@@ -24,3 +24,4 @@ if (!requireNamespace("R.utils", quietly = TRUE)) install.packages("R.utils")
 if (!requireNamespace("sf", quietly = TRUE)) install.packages("sf")
 if (!requireNamespace("terra", quietly = TRUE)) install.packages("terra")
 if (!requireNamespace("tidyr", quietly = TRUE)) install.packages("tidyr")
+if (!requireNamespace("partR2", quietly = TRUE)) install.packages("partR2")

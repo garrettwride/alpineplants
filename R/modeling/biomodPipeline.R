@@ -118,6 +118,8 @@ elevation_centroid <- function(suitability, elevation) {
   weighted_sum / suitability_sum
 }
 
+base_proj_dir <- "./projections"
+dir.create(base_proj_dir, showWarnings = FALSE, recursive = TRUE)
 
 algorithms   <- c("GLM", "GAM", "RF", "MAXENT")
 pa_strategies <- c("random", "disk")
@@ -243,13 +245,15 @@ for (i in seq_len(nrow(species_df))) {
           metric.filter = "all",
           build.clamping.mask = TRUE 
         )
+    
         
-        # Extract the SpatRaster object
+        # Extract projection rasters
         r <- rast(myBiomodProj@proj.out@link[1])
         r_bin <- rast(myBiomodProj@proj.out@link[2])
-        # Extract the SpatRaster objects
-        r <- rast(myBiomodProj@proj.out@link[1])
-        r_bin <- rast(myBiomodProj@proj.out@link[2])
+        
+        # Create species-specific directory
+        species_dir <- file.path(base_proj_dir, respName)
+        dir.create(species_dir, showWarnings = FALSE, recursive = TRUE)
         
         # Loop over algorithms
         for (algo in algorithms) {
@@ -258,20 +262,41 @@ for (i in seq_len(nrow(species_df))) {
           algo_raster <- get_model_layer(r, algo)
           algo_bin    <- get_model_layer(r_bin, algo)
           
-          # ---- Metrics ----
+          # ---- SAVE PROJECTION HERE ----
+          
+          file_stub <- paste(
+            respName,
+            "boot", b,
+            pa_strat,
+            paste0("PA", pa_mult),
+            algo,
+            sep = "_"
+          )
+          
+          writeRaster(
+            algo_raster,
+            filename = file.path(species_dir, paste0(file_stub, "_suitability.tif")),
+            overwrite = TRUE
+          )
+          
+          writeRaster(
+            algo_bin,
+            filename = file.path(species_dir, paste0(file_stub, "_binary.tif")),
+            overwrite = TRUE
+          )
+          
+          # ---- Metrics (UNCHANGED BELOW) ----
+          
           mean_suit <- global(algo_raster, "mean", na.rm = TRUE)[1,1]
           
           suitable_area <- global(algo_bin, "sum", na.rm = TRUE)[1,1] *
             prod(res(algo_bin))
           
-          # Schoener's D
           algo_norm <- normalize_raster(algo_raster)
           D_val <- schoeners_d(algo_norm, baseline_ensemble)
           
-          # Elevation centroid
           elev_cent <- elevation_centroid(algo_raster, elev_rocky)
           
-          # Model Performance (TSS)
           evals_df <- as.data.frame(get_evaluations(myBiomodModelOut))
           
           tss_row <- evals_df[
@@ -281,13 +306,9 @@ for (i in seq_len(nrow(species_df))) {
               evals_df$metric.eval == "TSS",
           ]
           
-          if(nrow(tss_row) == 0){
-            tss_val <- NA
-          } else {
-            tss_val <- tss_row$cutoff
-          }
+          tss_val <- ifelse(nrow(tss_row) == 0, NA, tss_row$cutoff)
           
-          # Save results
+          # Save results (unchanged)
           results <- rbind(
             results,
             data.frame(

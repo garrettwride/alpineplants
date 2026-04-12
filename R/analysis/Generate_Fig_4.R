@@ -58,16 +58,28 @@ method_uncertainty <- biomod_summary %>%
 
 plot_schoenersD <- function(df, title) {
   ggplot(df, aes(x = NicheBreadth, y = sd_SchoenersD)) +
-    geom_point(alpha = 0.7, size = 2) +
-    geom_smooth(method = "lm", se = TRUE, linewidth = 1) +
+    geom_point(color = "black", alpha = 0.8, size = 2.0) +
+    geom_smooth(method = "lm", se = TRUE, linewidth = 1, color = "blue") +
     labs(
       x = "Niche Breadth",
-      y = "Uncertainty (SD of Schoener's D)",
+      y = "Uncertainty (SD of Schoener’s D overlap)",
       title = title
     ) +
-    theme_minimal(base_size = 14)
+    theme_minimal(base_size = 12) +
+    theme(
+      plot.title = element_text(face = "bold",size = 14)
+    )
 }
 
-p_method <- plot_schoenersD(method_uncertainty, "Methodological Uncertainty")
-p_stochastic <- plot_schoenersD(stochastic_uncertainty, "Stochastic Uncertainty")
+p_method <- plot_schoenersD(
+  method_uncertainty,
+  "A. Methodological Uncertainty"
+)
+
+p_stochastic <- plot_schoenersD(
+  stochastic_uncertainty,
+  "B. Stochastic Uncertainty"
+) +
+  labs(y = NULL)
+
 grid.arrange(p_method, p_stochastic, ncol = 2)
